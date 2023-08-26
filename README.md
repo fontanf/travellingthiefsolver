@@ -10,17 +10,20 @@ This code was originally developped for the [GECCO 2023 Travelling Thief Problem
 Authors:
 * [Pierre Arvy](https://github.com/arvypierre)
 * [Martin Debouté](https://github.com/mdeboute)
-* [Florian Fontan](https://github.com/fontanf).
+* [Florian Fontan](https://github.com/fontanf)
 
 ## Implemented algorithms
 
 ### Travelling thief problem
 
+* Tree search (dynamic programming) implemented with [fontanf/treesearchsolver](https://github.com/fontanf/treesearchsolver) `-a tree_search`
+  * Exact algorithm, for very small problems (~10 cities)
+
 * Local search implemented with the sequencing module from [fontanf/localsearchsolver](https://github.com/fontanf/localsearchsolver) `-a local_search`
-  * Returns very good solutions but only practical for very small problems (< 100 cities)
+  * Returns very good solutions but only practical for small problems (< 100 cities)
 
 * Efficient local search implemented with [fontanf/localsearchsolver](https://github.com/fontanf/localsearchsolver) (but not using the sequecing module) `-a efficient_genetic_local_search`
-  * Returns good solutions for small problems (< 1000 cities)
+  * Returns good solutions for medium problems (< 1000 cities)
 
 * Iterative TSP PWT TTP `-a iterative_tsp_pwt_ttp`
   * Returns good solutions for large problems (< 10000 cities)

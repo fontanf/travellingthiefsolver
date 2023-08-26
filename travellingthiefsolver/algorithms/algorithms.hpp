@@ -2,6 +2,7 @@
 
 #include "travellingthiefsolver/solution.hpp"
 
+#include "travellingthiefsolver/algorithms/tree_search.hpp"
 #include "travellingthiefsolver/algorithms/local_search.hpp"
 #include "travellingthiefsolver/algorithms/efficient_local_search.hpp"
 #include "travellingthiefsolver/algorithms/iterative_tsp_pwt.hpp"

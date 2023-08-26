@@ -65,6 +65,17 @@ local_repository(
 )
 
 git_repository(
+    name = "treesearchsolver",
+    remote = "https://github.com/fontanf/treesearchsolver.git",
+    commit = "fe0adb73621d5798fd6b3d6a113ab6e2c3d7944d",
+)
+
+local_repository(
+    name = "treesearchsolver_",
+    path = "../treesearchsolver/",
+)
+
+git_repository(
     name = "localsearchsolver",
     remote = "https://github.com/fontanf/localsearchsolver.git",
     commit = "b8f8c76144a44acbbf1cf065979fd3a9fecfb892",

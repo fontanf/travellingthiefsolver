@@ -20,6 +20,9 @@ Output travellingthiefsolver::run(
     if (algorithm.empty() || algorithm_args[0].empty()) {
         throw std::invalid_argument("Missing algorithm.");
 
+    } else if (algorithm_args[0] == "tree_search") {
+        return tree_search(instance, info);
+
     } else if (algorithm_args[0] == "local_search") {
         return local_search(instance, info);
 

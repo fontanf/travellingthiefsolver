@@ -1,4 +1,15 @@
 cc_library(
+        name = "tree_search",
+        hdrs = ["tree_search.hpp"],
+        srcs = ["tree_search.cpp"],
+        deps = [
+                "//travellingthiefsolver:travellingthiefsolver",
+                "@treesearchsolver//treesearchsolver:treesearchsolver",
+        ],
+        visibility = ["//visibility:public"],
+)
+
+cc_library(
         name = "local_search",
         hdrs = ["local_search.hpp"],
         srcs = ["local_search.cpp"],
@@ -55,6 +66,7 @@ cc_library(
         hdrs = ["algorithms.hpp"],
         srcs = ["algorithms.cpp"],
         deps = [
+                ":tree_search",
                 ":local_search",
                 ":efficient_local_search",
                 ":iterative_tsp_pwt",

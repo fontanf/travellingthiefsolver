@@ -1,5 +1,7 @@
 #pragma once
 
+#include "packingwhiletravellingsolver/utils.hpp"
+
 #include "optimizationtools/utils/info.hpp"
 #include "optimizationtools/utils/utils.hpp"
 
@@ -10,6 +12,7 @@ namespace travellingthiefsolver
 
 using CityId = int64_t;
 using CityPos = int64_t;
+using CityStateId = packingwhiletravellingsolver::CityStateId;
 using Distance = int64_t;
 using Time = double;
 using ItemId = int64_t;
