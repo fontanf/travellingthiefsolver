@@ -23,6 +23,7 @@ std::ostream& Instance::print(
             << "City weight:       " << city_weight() << std::endl
             << "Weight sum:        " << weight_sum_ << std::endl
             << "Weight ratio:      " << (double)weight_sum_ / capacity() << std::endl
+            << "Extra profit:      " << unreduction_info_.extra_profit << std::endl
             ;
     }
 

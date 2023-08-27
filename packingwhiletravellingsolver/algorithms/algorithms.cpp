@@ -32,6 +32,11 @@ Output packingwhiletravellingsolver::run(
         parameters.info = info;
         return sequential_value_correction(instance, parameters);
 
+    } else if (algorithm_args[0] == "dynamic_programming") {
+        DynamicProgrammingOptionalParameters parameters;
+        parameters.info = info;
+        return dynamic_programming(instance, parameters);
+
     } else if (algorithm_args[0] == "efficient_local_search") {
         EfficientLocalSearchOptionalParameters parameters;
         parameters.info = info;

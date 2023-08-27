@@ -4,6 +4,7 @@
 
 #include "packingwhiletravellingsolver/algorithms/greedy.hpp"
 #include "packingwhiletravellingsolver/algorithms/sequential_value_correction.hpp"
+#include "packingwhiletravellingsolver/algorithms/dynamic_programming.hpp"
 #include "packingwhiletravellingsolver/algorithms/efficient_local_search.hpp"
 #include "packingwhiletravellingsolver/algorithms/large_neighborhood_search.hpp"
 

@@ -18,6 +18,16 @@ cc_library(
 )
 
 cc_library(
+        name = "dynamic_programming",
+        hdrs = ["dynamic_programming.hpp"],
+        srcs = ["dynamic_programming.cpp"],
+        deps = [
+                "//packingwhiletravellingsolver:packingwhiletravellingsolver",
+        ],
+        visibility = ["//visibility:public"],
+)
+
+cc_library(
         name = "efficient_local_search",
         hdrs = ["efficient_local_search.hpp"],
         srcs = ["efficient_local_search.cpp"],
@@ -48,6 +58,7 @@ cc_library(
         deps = [
                 ":greedy",
                 ":sequential_value_correction",
+                ":dynamic_programming",
                 ":efficient_local_search",
                 ":large_neighborhood_search",
                 "@boost//:program_options",
