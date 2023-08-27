@@ -94,8 +94,11 @@ struct ReductionParameters
     /** Boolean indicating if the reduction should be performed. */
     bool reduce = true;
 
+    /** Enable expensive reduction. */
+    bool enable_expensive_reduction = true;
+
     /** Maximum number of rounds. */
-    Counter maximum_number_of_rounds = 10;
+    Counter maximum_number_of_rounds = 4;
 };
 
 /**
@@ -202,6 +205,13 @@ private:
 
     /** Remove compulsory items. */
     bool reduce_compulsory_items();
+
+    /**
+     * Reduce using the algorithm from "The Packing While Traveling Problem"
+     * (Polyakovskiy and Neumann, 2017).
+     */
+    bool reduce_polyakovskiy2017(
+            Counter maximum_number_of_rounds);
 
     /*
      * Private attributes
