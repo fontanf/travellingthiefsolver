@@ -33,6 +33,9 @@ Authors:
 
 ### Packing while travelling problem
 
+* Dynamic programming `-a dynamic_programming`
+  * Exact algorithm, for small problems
+
 * Sequential value correction `-a sequential_value_correction`
   * Very fast, a few seconds for very large problems
   * Works well when the capacity constraint is active
