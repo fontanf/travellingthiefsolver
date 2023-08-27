@@ -314,6 +314,30 @@ void Output::update_solution(
     info.unlock();
 }
 
+void Output::update_bound(
+        Profit bound_new,
+        const std::stringstream& s,
+        optimizationtools::Info& info)
+{
+    info.lock();
+
+    if (bound > bound_new) {
+        // Update solution
+        bound = bound_new;
+        print(info, s);
+
+        double t = info.elapsed_time();
+
+        info.output->number_of_bounds++;
+        std::string sol_str = "Bound" + std::to_string(info.output->number_of_solutions);
+        info.add_to_json(sol_str, "Value", bound_new);
+        info.add_to_json(sol_str, "Time", t);
+        info.add_to_json(sol_str, "String", s.str());
+    }
+
+    info.unlock();
+}
+
 Output& Output::algorithm_end(optimizationtools::Info& info)
 {
     std::string solution_value = optimizationtools::solution_value(

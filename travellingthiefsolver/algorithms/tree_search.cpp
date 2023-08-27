@@ -442,9 +442,16 @@ Output travellingthiefsolver::tree_search(
                 }
             }
             std::stringstream ss;
+            ss << "node " << bfs_output.number_of_nodes;
             output.update_solution(solution, ss, info);
         };
     treesearchsolver::best_first_search(branching_scheme, bfs_parameters);
+
+    if (!info.needs_to_end()) {
+        std::stringstream ss;
+        ss << "tree search completed";
+        output.update_bound(output.solution.objective(), ss, info);
+    }
 
     return output.algorithm_end(info);
 }
