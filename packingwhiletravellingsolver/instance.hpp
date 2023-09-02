@@ -207,8 +207,9 @@ private:
     bool reduce_compulsory_items();
 
     /**
-     * Reduce using the algorithm from "The Packing While Traveling Problem"
-     * (Polyakovskiy and Neumann, 2017).
+     * Reduce using the algorithm from:
+     * - "The Packing While Traveling Problem" (Polyakovskiy and Neumann, 2017)
+     *   https://doi.org/10.1016/j.ejor.2016.09.035
      */
     bool reduce_polyakovskiy2017(
             Counter maximum_number_of_rounds);
