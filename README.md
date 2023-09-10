@@ -4,6 +4,7 @@ A solver for various problems related to the travelling thief problem:
 * The travelling thief problem
 * The packing while travelling problem
 * The travelling while packing problem
+* The thief orienteering problem
 
 This code was originally developped for the [GECCO 2023 Travelling Thief Problem Competition](https://sites.google.com/view/ttp-gecco2023/home).
 
@@ -47,6 +48,14 @@ Authors:
 ### Travelling while packing problem
 
 * Local search implemented with the sequencing module from [fontanf/localsearchsolver](https://github.com/fontanf/localsearchsolver) `-a local_search`
+
+### Thief orienteering problem
+
+* Tree search (dynamic programming) implemented with [fontanf/treesearchsolver](https://github.com/fontanf/treesearchsolver) `-a tree_search`
+  * Exact algorithm, for very small problems (~10 cities)
+
+* Local search implemented with the sequencing module from [fontanf/localsearchsolver](https://github.com/fontanf/localsearchsolver) `-a local_search`
+  * Returns very good solutions but only practical for small problems (< 100 cities)
 
 ## Usage (command line)
 

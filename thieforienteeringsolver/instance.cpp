@@ -1,8 +1,8 @@
-#include "travellingthiefsolver/instance.hpp"
+#include "thieforienteeringsolver/instance.hpp"
 
 #include "optimizationtools/utils/utils.hpp"
 
-using namespace travellingthiefsolver;
+using namespace thieforienteeringsolver;
 
 Instance::Instance(CityId number_of_cities):
     cities_(number_of_cities)
@@ -96,12 +96,12 @@ void Instance::read_polyakovskiy2014(std::ifstream& file)
             number_of_items = std::stol(line.back());
         } else if (tmp.rfind("CAPACITY OF KNAPSACK", 0) == 0) {
             set_capacity(std::stol(line.back()));
+        } else if (tmp.rfind("MAX TIME", 0) == 0) {
+            set_time_limit(std::stol(line.back()));
         } else if (tmp.rfind("MIN SPEED", 0) == 0) {
             set_minimum_speed(std::stod(line.back()));
         } else if (tmp.rfind("MAX SPEED", 0) == 0) {
             set_maximum_speed(std::stod(line.back()));
-        } else if (tmp.rfind("RENTING RATIO", 0) == 0) {
-            set_renting_ratio(std::stod(line.back()));
         } else if (tmp.rfind("EDGE_WEIGHT_TYPE", 0) == 0) {
             edge_weight_type_ = line.back();
         } else if (tmp.rfind("EDGE_WEIGHT_FORMAT", 0) == 0) {
@@ -304,7 +304,7 @@ std::ostream& Instance::print(
             << "Capacity:          " << capacity() << std::endl
             << "Minimum speed:     " << minimum_speed() << std::endl
             << "Maximum speed:     " << maximum_speed() << std::endl
-            << "Renting ratio:     " << renting_ratio() << std::endl
+            << "Time limit:        " << time_limit() << std::endl
             << "Profit sum:        " << profit_sum_ << std::endl
             << "Weight sum:        " << weight_sum_ << std::endl
             << "Weight ratio:      " << (double)weight_sum_ / capacity() << std::endl
@@ -392,13 +392,13 @@ std::ostream& Instance::print(
     return os;
 }
 
-void travellingthiefsolver::init_display(
+void thieforienteeringsolver::init_display(
         const Instance& instance,
         optimizationtools::Info& info)
 {
     info.os()
         << "=====================================" << std::endl
-        << "       Travelling thief solver       " << std::endl
+        << "      Thief orienteering solver      " << std::endl
         << "=====================================" << std::endl
         << std::endl
         << "Instance" << std::endl

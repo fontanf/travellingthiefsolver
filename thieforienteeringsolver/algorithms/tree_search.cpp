@@ -1,8 +1,8 @@
-#include "travellingthiefsolver/algorithms/tree_search.hpp"
+#include "thieforienteeringsolver/algorithms/tree_search.hpp"
 
 #include "treesearchsolver/best_first_search.hpp"
 
-using namespace travellingthiefsolver;
+using namespace thieforienteeringsolver;
 
 class BranchingScheme
 {
@@ -58,9 +58,6 @@ public:
 
         /** Remaining weight. */
         Weight remaining_weight = 0;
-
-        /** Objective value. */
-        Profit objective = -std::numeric_limits<Profit>::infinity();
 
         /** Bound. */
         Profit bound = std::numeric_limits<Profit>::infinity();
@@ -118,7 +115,8 @@ public:
         auto r = std::shared_ptr<Node>(new BranchingScheme::Node());
         r->visited_cities.resize(instance_.number_of_cities(), false);
         r->visited_cities[0] = true;
-        r->number_of_cities = 1;
+        r->visited_cities[instance_.number_of_cities() - 1] = true;
+        r->number_of_cities = 2;
         r->last_visited_city_id = 0;
         r->remaining_profit = 0;
         r->remaining_weight = 0;
@@ -168,9 +166,21 @@ public:
             return nullptr;
 
         // Check capacity.
-        if (father->weight
-                + city_states_[city_id_next][city_state_id_next].total_weight
-                > instance_.capacity())
+        Weight weight = father->weight
+            + city_states_[city_id_next][city_state_id_next].total_weight;
+        if (weight > instance_.capacity())
+            return nullptr;
+
+        // Check time limit.
+        Time t = instance_.duration(
+                father->last_visited_city_id,
+                city_id_next,
+                father->weight);
+        Time t_end = instance_.duration(
+                city_id_next,
+                instance().number_of_cities() - 1,
+                weight);
+        if (father->time + t + t_end > instance().time_limit())
             return nullptr;
 
         // Compute new child.
@@ -189,10 +199,6 @@ public:
                 father->last_visited_city_id,
                 city_id_next);
         child->distance = father->distance + d;
-        Time t = instance_.duration(
-                father->last_visited_city_id,
-                city_id_next,
-                father->weight);
         child->time = father->time + t;
         child->profit = father->profit
             + city_states_[city_id_next][city_state_id_next].total_profit;
@@ -206,22 +212,14 @@ public:
             - city_states_[city_id_next].back().total_weight;
         Time d_end = instance_.distance(
                 city_id_next,
-                0);
+                instance_.number_of_cities() - 1);
         child->distance_full = child->distance + d_end;
-        Time t_end = instance_.duration(
-                city_id_next,
-                0,
-                child->weight);
         child->time_full = child->time + t_end;
-        child->objective = child->profit
-            - instance_.renting_ratio() * child->time_full;
         Weight remaining_capacity = instance_.capacity() - child->weight;
         Profit profit_bound = child->profit + std::min(
                 child->remaining_profit,
                 best_efficiency_ * remaining_capacity);
-        double speed = instance_.speed(child->weight);
-        child->bound = profit_bound - instance_.renting_ratio()
-            * (child->time_full + (double)child->minimum_remaining_distance / speed);
+        child->bound = profit_bound;
         child->guide = -child->bound;
         //std::cout << "child id " << child->node_id << std::endl;
         return child;
@@ -253,9 +251,7 @@ public:
             const std::shared_ptr<Node>& node_1,
             const std::shared_ptr<Node>& node_2) const
     {
-        if (node_2->number_of_cities != instance_.number_of_cities())
-            return false;
-        if (node_1->bound <= node_2->objective)
+        if (node_1->bound <= node_2->profit)
             return true;
         return false;
     }
@@ -268,11 +264,7 @@ public:
             const std::shared_ptr<Node>& node_1,
             const std::shared_ptr<Node>& node_2) const
     {
-        if (node_1->number_of_cities != instance_.number_of_cities())
-            return false;
-        if (node_2->number_of_cities != instance_.number_of_cities())
-            return true;
-        return node_1->objective > node_2->objective;
+        return node_1->profit > node_2->profit;
     }
 
     bool equals(
@@ -341,11 +333,10 @@ public:
     std::string display(const std::shared_ptr<Node>& node) const
     {
         std::stringstream ss;
-        ss << node->objective
+        ss << node->profit
             << " (t" << node->time
             << " m" << node->number_of_items
             << " w" << node->weight
-            << " p" << node->profit
             << ")";
         return ss.str();
     }
@@ -367,7 +358,6 @@ public:
                 << " t_full " << node_tmp->time_full
                 << " w " << node_tmp->weight
                 << " p " << node_tmp->profit
-                << " obj " << node_tmp->objective
                 << " guide " << node_tmp->guide
                 << " j " << node_tmp->last_visited_city_id
                 << " p1 " << node_tmp->next_child_city_id
@@ -404,7 +394,7 @@ private:
 
 };
 
-Output travellingthiefsolver::tree_search(
+Output thieforienteeringsolver::tree_search(
         const Instance& instance,
         optimizationtools::Info info)
 {
@@ -453,7 +443,7 @@ Output travellingthiefsolver::tree_search(
     if (!info.needs_to_end()) {
         std::stringstream ss;
         ss << "tree search completed";
-        output.update_bound(output.solution.objective(), ss, info);
+        output.update_bound(output.solution.item_profit(), ss, info);
     }
 
     return output.algorithm_end(info);
