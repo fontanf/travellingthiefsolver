@@ -238,6 +238,7 @@ EfficientLocalSearchOutput packingwhiletravellingsolver::efficient_local_search(
     for (output.number_of_iterations = 0;
             !parameters.info.needs_to_end();
             ++output.number_of_iterations) {
+        Profit objective_cur = solution.objective;
 
         //std::cout << "number_of_iterations " << output.number_of_iterations << std::endl;
 
@@ -286,6 +287,15 @@ EfficientLocalSearchOutput packingwhiletravellingsolver::efficient_local_search(
         //std::cout << solution_objective << std::endl;
         if (number_of_improvements == 0)
             break;
+        if (objective_cur > 0) {
+            double improvement = (solution.objective - objective_cur) / objective_cur;
+            //std::cout
+            //    << "objective_cur " << objective_cur
+            //    << " objective_new " << solution.objective
+            //    << " improvement " << improvement << std::endl;
+            if (improvement < parameters.minimum_improvement)
+                break;
+        }
     }
 
     std::vector<uint8_t> items(instance.number_of_items());
