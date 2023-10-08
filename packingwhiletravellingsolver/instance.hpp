@@ -95,7 +95,7 @@ struct ReductionParameters
     bool reduce = true;
 
     /** Enable expensive reduction. */
-    bool enable_expensive_reduction = true;
+    bool enable_expensive_reduction = false;
 
     /** Maximum number of rounds. */
     Counter maximum_number_of_rounds = 4;
