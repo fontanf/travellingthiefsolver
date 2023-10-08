@@ -4,11 +4,13 @@ cc_library(
         name = "travellingthiefsolver",
         hdrs = [
                 "instance.hpp",
+                "instance_builder.hpp",
                 "solution.hpp",
                 "utils.hpp",
         ],
         srcs = [
                 "instance.cpp",
+                "instance_builder.cpp",
                 "solution.cpp",
                 "utils.cpp",
         ],

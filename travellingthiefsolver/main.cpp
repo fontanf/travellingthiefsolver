@@ -1,3 +1,4 @@
+#include "travellingthiefsolver/instance_builder.hpp"
 #include "travellingthiefsolver/algorithms/algorithms.hpp"
 
 #include <boost/program_options.hpp>
@@ -55,8 +56,6 @@ int main(int argc, char *argv[])
 
     // Run algorithm
 
-    Instance instance(instance_path, format);
-
     optimizationtools::Info info = optimizationtools::Info()
         .set_verbosity_level(verbosity_level)
         .set_time_limit(time_limit)
@@ -68,6 +67,9 @@ int main(int argc, char *argv[])
         .set_maximum_log_level(loglevelmax)
         .set_sigint_handler()
         ;
+
+    InstanceBuilder instance_builder(instance_path, format);
+    Instance instance = instance_builder.build();
 
     std::mt19937_64 generator(seed);
     Solution solution(instance, initial_solution_path);

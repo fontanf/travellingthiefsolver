@@ -74,7 +74,7 @@ IterativeTspPwtOutput travellingthiefsolver::iterative_tsp_pwt(
                     tsp_solution);
 
             packingwhiletravellingsolver::SequentialValueCorrectionOptionalParameters svc_parameters;
-            //pwt_parameters.parameters.info.set_verbosity_level(1);
+            //svc_parameters.info.set_verbosity_level(1);
             auto svc_output = packingwhiletravellingsolver::sequential_value_correction(
                     pwt_instance,
                     svc_parameters);
@@ -205,7 +205,7 @@ IterativeTspPwtOutput travellingthiefsolver::iterative_tsp_pwt(
                             const Solution& solution_1,
                             const Solution& solution_2) -> bool
                         {
-                        return solution_1.objective() > solution_2.objective();
+                            return solution_1.objective() > solution_2.objective();
                         });
                 while (svc_solutions.size() > 3)
                     svc_solutions.pop_back();

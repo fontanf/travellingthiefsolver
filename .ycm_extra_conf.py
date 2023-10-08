@@ -20,8 +20,8 @@ def Settings(**kwargs):
                 'optimizationtools/',
 
                 # travelingsalesmansolver
-                # '-I', './bazel-travellingthiefsolver/external/'
-                '-I', './../'
+                '-I', './bazel-travellingthiefsolver/external/'
+                # '-I', './../'
                 'travelingsalesmansolver/',
 
                 # knapsacksolver

@@ -1,3 +1,4 @@
+#include "travellingthiefsolver/instance_builder.hpp"
 #include "travellingthiefsolver/utils.hpp"
 
 #include <boost/program_options.hpp>
@@ -37,7 +38,8 @@ int main(int argc, char *argv[])
     }
 
     // Read instance.
-    Instance instance(instance_path, format);
+    InstanceBuilder instance_builder(instance_path, format);
+    Instance instance = instance_builder.build();
 
     // Read solution.
     Solution solution(instance, certificate_path);

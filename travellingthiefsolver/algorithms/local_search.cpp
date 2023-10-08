@@ -153,6 +153,7 @@ Output travellingthiefsolver::local_search(
 
     Output output(instance, info);
 
+    instance.compute_distances();
     auto city_states = packingwhiletravellingsolver::compute_city_states<Instance>(instance);
 
     //for (CityId city_id = 0; city_id < instance.number_of_cities(); ++city_id) {

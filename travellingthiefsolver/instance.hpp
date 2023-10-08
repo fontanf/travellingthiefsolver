@@ -66,51 +66,7 @@ public:
      * Constructors and destructor
      */
 
-    /** Create an instance from a file. */
-    Instance(
-            std::string instance_path,
-            std::string format);
-
-    /** Create an instance manually. */
-    Instance(CityId number_of_cities = 0);
-
-    /** Set the coordinates of a city. */
-    void set_xy(
-            CityId city_id,
-            double x,
-            double y,
-            double z = -1);
-
-    /** Set the distance between two cities. */
-    inline void set_distance(
-            CityId city_id_1,
-            CityId city_id_2,
-            Distance distance)
-    {
-        if (city_id_1 > city_id_2) {
-            distances_[city_id_1][city_id_2] = distance;
-        } else {
-            distances_[city_id_2][city_id_1] = distance;
-        }
-    }
-
-    /** Set the minimum speed. */
-    void set_minimum_speed(double minimum_speed) { speed_min_ = minimum_speed; }
-
-    /** Set the maximum speed. */
-    void set_maximum_speed(double maximum_speed) { speed_max_ = maximum_speed; }
-
-    /** Set the renting ratio. */
-    void set_renting_ratio(double renting_ratio) { renting_ratio_ = renting_ratio; }
-
-    /** Set the capacity of the knapsack. */
-    void set_capacity(Weight capacity) { capacity_ = capacity; }
-
-    /** Add an item. */
-    void add_item(
-            CityId city_id,
-            Weight weight,
-            Profit profit);
+    void compute_distances() const;
 
     /*
      * Getters
@@ -184,8 +140,33 @@ private:
      * Private methods
      */
 
-    /** Read an instance from a file in 'polyakovskiy2014' format. */
-    void read_polyakovskiy2014(std::ifstream& file);
+    /** Create an instance manually. */
+    Instance() { }
+
+    inline void init_distances() const
+    {
+        distances_ = std::vector<std::vector<Distance>>(number_of_cities());
+        for (CityId city_id = 0;
+                city_id < number_of_cities();
+                ++city_id) {
+            distances_[city_id] = std::vector<Distance>(
+                    city_id,
+                    std::numeric_limits<Distance>::max());
+        }
+    }
+
+    /** Set the distance between two cities. */
+    inline void set_distance(
+            CityId city_id_1,
+            CityId city_id_2,
+            Distance distance) const
+    {
+        if (city_id_1 > city_id_2) {
+            distances_[city_id_1][city_id_2] = distance;
+        } else {
+            distances_[city_id_2][city_id_1] = distance;
+        }
+    }
 
     /*
      * Private attributes
@@ -195,7 +176,7 @@ private:
     std::vector<City> cities_;
 
     /** Distances. */
-    std::vector<std::vector<Distance>> distances_;
+    mutable std::vector<std::vector<Distance>> distances_;
 
     /** Minimum speed. */
     double speed_min_ = -1;
@@ -232,6 +213,8 @@ private:
      */
     std::string node_coord_type_ = "TWOD_COORDS";
 
+    friend class InstanceBuilder;
+
 };
 
 void init_display(
@@ -246,10 +229,30 @@ inline Distance Instance::distance(
         CityId city_id_1,
         CityId city_id_2) const
 {
-    if (city_id_1 > city_id_2) {
-        return distances_[city_id_1][city_id_2];
+    if (!distances_.empty()) {
+        if (city_id_1 > city_id_2) {
+            return distances_[city_id_1][city_id_2];
+        } else {
+            return distances_[city_id_2][city_id_1];
+        }
+    } else if (edge_weight_type_ == "EUC_2D") {
+        double xd = x(city_id_2) - x(city_id_1);
+        double yd = y(city_id_2) - y(city_id_1);
+        return std::round(std::sqrt(xd * xd + yd * yd));
+    } else if (edge_weight_type_ == "CEIL_2D") {
+        double xd = x(city_id_2) - x(city_id_1);
+        double yd = y(city_id_2) - y(city_id_1);
+        return std::ceil(std::sqrt(xd * xd + yd * yd));
+    } else if (edge_weight_type_ == "ATT") {
+        double xd = x(city_id_1) - x(city_id_2);
+        double yd = y(city_id_1) - y(city_id_2);
+        double rij = sqrt((xd * xd + yd * yd) / 10.0);
+        int tij = std::round(rij);
+        return (tij < rij)? tij + 1: tij;
     } else {
-        return distances_[city_id_2][city_id_1];
+        throw std::invalid_argument(
+                "Unknown edge weight type \"" + edge_weight_type_ + "\".");
+        return -1;
     }
 }
 

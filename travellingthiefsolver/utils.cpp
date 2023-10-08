@@ -1,5 +1,6 @@
 #include "travellingthiefsolver/utils.hpp"
 
+#include "travelingsalesmansolver/instance_builder.hpp"
 #include "travelingsalesmansolver/algorithms/lkh.hpp"
 
 using namespace travellingthiefsolver;
@@ -7,32 +8,33 @@ using namespace travellingthiefsolver;
 travelingsalesmansolver::Instance travellingthiefsolver::create_tsp_instance(
         const Instance& instance)
 {
-    travelingsalesmansolver::Instance tsp_instance(instance.number_of_cities());
-    tsp_instance.set_edge_weight_type(instance.edge_weight_type());
-    tsp_instance.set_node_coord_type(instance.node_coord_type());
+    travelingsalesmansolver::InstanceBuilder tsp_instance_builder;
+    tsp_instance_builder.add_vertices(instance.number_of_cities());
+    tsp_instance_builder.set_edge_weight_type(instance.edge_weight_type());
+    tsp_instance_builder.set_node_coord_type(instance.node_coord_type());
     // Set coordiantes.
     for (travelingsalesmansolver::VertexId vertex_id = 0;
-            vertex_id < tsp_instance.number_of_vertices();
+            vertex_id < instance.number_of_cities();
             ++vertex_id) {
         const City& city = instance.city(vertex_id);
-        tsp_instance.set_coordinates(vertex_id, city.x, city.y, city.z);
+        tsp_instance_builder.set_coordinates(vertex_id, city.x, city.y, city.z);
     }
     // Set distances.
     if (instance.edge_weight_type() == "EXPLICIT") {
         for (travelingsalesmansolver::VertexId vertex_id_1 = 0;
-                vertex_id_1 < tsp_instance.number_of_vertices();
+                vertex_id_1 < instance.number_of_cities();
                 ++vertex_id_1) {
             for (travelingsalesmansolver::VertexId vertex_id_2 = 0;
-                    vertex_id_2 < tsp_instance.number_of_vertices();
+                    vertex_id_2 < instance.number_of_cities();
                     ++vertex_id_2) {
-                tsp_instance.set_distance(
+                tsp_instance_builder.set_distance(
                         vertex_id_1,
                         vertex_id_2,
                         instance.distance(vertex_id_1, vertex_id_2));
             }
         }
     }
-    return tsp_instance;
+    return tsp_instance_builder.build();
 }
 
 Solution travellingthiefsolver::retrieve_solution(
