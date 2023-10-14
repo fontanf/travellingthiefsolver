@@ -17,7 +17,7 @@ void EfficientLocalSearchOutput::print_statistics(
     info.add_to_json("Algorithm", "NumberOfIterations", number_of_iterations);
 }
 
-namespace packingwhiletravellingsolver
+namespace
 {
 
 /**
@@ -49,8 +49,6 @@ struct EfficientLocalSearchSolution
     /** Objective value of the solution. */
     Profit objective;
 };
-
-}
 
 EfficientLocalSearchSolution init_solution(
         const Instance& instance,
@@ -196,6 +194,29 @@ void apply_move(
     solution.city_states[city_id] = city_state_id;
 }
 
+Solution efficient_local_search_initial_solution(
+        const Instance& instance,
+        EfficientLocalSearchOptionalParameters parameters)
+{
+    if (parameters.initial_solution != nullptr) {
+        std::vector<uint8_t> items(instance.number_of_items());
+        for (ItemId item_id = 0;
+                item_id < instance.number_of_items();
+                ++item_id) {
+            ItemId orig_item_id = instance.unreduction_info().unreduction_operations[item_id];
+            if (parameters.initial_solution->contains(orig_item_id))
+                items[item_id] = 1;
+        }
+        return Solution(instance, items);
+    } else {
+        auto svc_output = packingwhiletravellingsolver::sequential_value_correction(
+                instance);
+        return svc_output.solution;
+    }
+}
+
+}
+
 EfficientLocalSearchOutput packingwhiletravellingsolver::efficient_local_search(
         const Instance& original_instance,
         EfficientLocalSearchOptionalParameters parameters)
@@ -224,9 +245,7 @@ EfficientLocalSearchOutput packingwhiletravellingsolver::efficient_local_search(
 
     EfficientLocalSearchOutput output(original_instance, parameters.info);
 
-    auto svc_output = packingwhiletravellingsolver::sequential_value_correction(
-            instance);
-    Solution initial_solution = svc_output.solution;
+    Solution initial_solution = efficient_local_search_initial_solution(instance, parameters);
 
     auto city_states = packingwhiletravellingsolver::compute_city_states<Instance>(instance);
 
