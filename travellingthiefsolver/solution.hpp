@@ -12,8 +12,8 @@ namespace travellingthiefsolver
  */
 struct SolutionCity
 {
-    /** 'true' iff the city is in the solution. */
-    bool in = false;
+    /** Position of the city in the solution. */
+    CityPos position = -1;
 
     /** Number of selected items. */
     ItemId number_of_items = 0;
@@ -57,6 +57,9 @@ public:
 
     /** Get the city at a given position. */
     inline CityId city_id(CityPos pos) const { return city_ids_[pos]; }
+
+    /** Get a city. */
+    inline const SolutionCity& city(CityId city_id) const { return cities_[city_id]; }
 
     /** Get the number of items selected in the solution. */
     inline ItemId number_of_items() const { return item_ids_.size(); }

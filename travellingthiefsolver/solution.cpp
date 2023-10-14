@@ -9,7 +9,7 @@ Solution::Solution(const Instance& instance):
 {
     // Add initial city.
     city_ids_.push_back(0);
-    cities_[0].in = true;
+    cities_[0].position = 0;
 }
 
 Solution::Solution(
@@ -64,19 +64,19 @@ bool Solution::feasible() const
 void Solution::add_city(CityId city_id)
 {
     // Check that the city has not already been visited.
-    if (cities_[city_id].in) {
+    if (cities_[city_id].position >= 0) {
         throw std::runtime_error(
                 "travellingthiefsolver::Solution::add_city(CityId)."
                 "City " + std::to_string(city_id) + " is already in the solution.");
     }
 
     CityId city_id_prev = city_ids_.back();
-    city_ids_.push_back(city_id);
-    cities_[city_id].in = true;
+    cities_[city_id].position = city_ids_.size();
     distance_cur_ += instance().distance(city_id_prev, city_id);
     distance_ = distance_cur_ + instance().distance(city_id, 0);
     travel_time_cur_ += instance().duration(city_id_prev, city_id, item_weight_);
     travel_time_ = travel_time_cur_ + instance().duration(city_id, 0, item_weight_);
+    city_ids_.push_back(city_id);
 }
 
 void Solution::add_item(ItemId item_id)
