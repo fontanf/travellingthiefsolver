@@ -249,10 +249,8 @@ bool Instance::reduce_compulsory_items()
 bool Instance::reduce_polyakovskiy2017(
         Counter maximum_number_of_rounds)
 {
-    std::vector<int> unprofitable_items(number_of_items(), 0);
-    std::vector<int> compulsory_items(number_of_items(), 0);
-    ItemId number_of_unprofitable_items = 0;
-    ItemId number_of_compulsory_items = 0;
+    optimizationtools::IndexedSet unprofitable_items(number_of_items());
+    optimizationtools::IndexedSet compulsory_items(number_of_items());
 
     std::vector<double> profit_prime(number_of_items(), 0);
     for (ItemId item_id = 0; item_id < number_of_items(); ++item_id)
@@ -292,7 +290,7 @@ bool Instance::reduce_polyakovskiy2017(
                 const Item& item = this->item(item_id);
 
                 // Don't consider unprofitable items.
-                if (unprofitable_items[item_id] == 1)
+                if (unprofitable_items.contains(item_id))
                     continue;
 
                 // Update w_max.
@@ -318,8 +316,8 @@ bool Instance::reduce_polyakovskiy2017(
                     ItemId item_id_1 = city_1.item_ids[item_pos_1];
                     const Item& item_1 = this->item(item_id_1);
 
-                    if (unprofitable_items[item_id_1] == 1
-                            || compulsory_items[item_id_1] == 1) {
+                    if (unprofitable_items.contains(item_id_1)
+                            || compulsory_items.contains(item_id_1)) {
                         continue;
                     }
 
@@ -342,11 +340,11 @@ bool Instance::reduce_polyakovskiy2017(
                             const Item& item_2 = this->item(item_id_2);
 
                             // Only consider non unprofitable items.
-                            if (unprofitable_items[item_id_2] == 1)
+                            if (unprofitable_items.contains(item_id_2))
                                 continue;
 
                             // If true, item is not compulsory.
-                            if (compulsory_items[item_id_2] == 0
+                            if (!compulsory_items.contains(item_id_2)
                                     && item_1.weight >= item_2.weight
                                     && item_1.profit - c_min <= profit_prime[item_id_2]) {
                                 profit_prime[item_id_1] = profit_prime[item_id_2] + c_min;
@@ -355,11 +353,10 @@ bool Instance::reduce_polyakovskiy2017(
                             }
 
                             // If true, item is compulsory.
-                            if (compulsory_items[item_id_2] == 1
+                            if (compulsory_items.contains(item_id_2)
                                     && item_1.weight <= item_2.weight
                                     && item_1.profit - c_max > profit_prime[item_id_2]) {
-                                compulsory_items[item_id_1] = 1;
-                                number_of_compulsory_items++;
+                                compulsory_items.add(item_id_1);
                                 profit_prime[item_id_1] = profit_prime[item_id_2] + c_max;
                                 found = true;
                                 flag_prime = true;
@@ -393,8 +390,7 @@ bool Instance::reduce_polyakovskiy2017(
                     // If the item is compulsory indenpendently of any other item.
                     profit_prime[item_id_1] = c_max;
                     if (c_max < item_1.profit) {
-                        compulsory_items[item_id_1] = 1;
-                        number_of_compulsory_items++;
+                        compulsory_items.add(item_id_1);
                         found = true;
                     }
                 }
@@ -411,7 +407,7 @@ bool Instance::reduce_polyakovskiy2017(
             w_comp[city_id] = w_comp[city_id - 1] + city.weight;
 
             for (ItemId item_id: city.item_ids) {
-                if (compulsory_items[item_id] == 0)
+                if (!compulsory_items.contains(item_id))
                     continue;
                 w_comp[city_id] += this->item(item_id).weight;
             }
@@ -430,8 +426,8 @@ bool Instance::reduce_polyakovskiy2017(
                 ItemId item_id_1 = city_1.item_ids[item_pos_1];
                 const Item& item_1 = this->item(item_id_1);
 
-                if (unprofitable_items[item_id_1] == 1
-                        || compulsory_items[item_id_1] == 1) {
+                if (unprofitable_items.contains(item_id_1)
+                        || compulsory_items.contains(item_id_1)) {
                     continue;
                 }
 
@@ -454,11 +450,11 @@ bool Instance::reduce_polyakovskiy2017(
                         const Item& item_2 = this->item(item_id_2);
 
                         // Only consider non compulsory items
-                        if (compulsory_items[item_id_2] == 1)
+                        if (compulsory_items.contains(item_id_2))
                             continue;
 
                         // If true, item is not unprofitable
-                        if (unprofitable_items[item_id_2] == 0
+                        if (!unprofitable_items.contains(item_id_2)
                                 && item_1.weight <= item_2.weight
                                 && item_1.profit - c_max > profit_prime[item_id_2]) {
                             profit_prime[item_id_1] = profit_prime[item_id_2] + c_max;
@@ -467,11 +463,10 @@ bool Instance::reduce_polyakovskiy2017(
                         }
 
                         // If ture, item is unprofitable
-                        if (unprofitable_items[item_id_2] == 1
+                        if (unprofitable_items.contains(item_id_2)
                                 && item_1.weight >= item_2.weight
                                 && item_1.profit - c_min <= profit_prime[item_id_2]) {
-                            unprofitable_items[item_id_1] = 1;
-                            number_of_unprofitable_items++;
+                            unprofitable_items.add(item_id_1);
                             profit_prime[item_id_1] = profit_prime[item_id_2] + c_min;
                             found = true;
                             flag_prime = true;
@@ -494,8 +489,7 @@ bool Instance::reduce_polyakovskiy2017(
 
                     // If item is unprofitable by itself.
                     if (c_min >= item_1.profit) {
-                        unprofitable_items[item_id_1] = 1;
-                        number_of_unprofitable_items++;
+                        unprofitable_items.add(item_id_1);
                         profit_prime[item_id_1] = c_min;
                         found = true;
                         flag_prime = true;
@@ -518,8 +512,8 @@ bool Instance::reduce_polyakovskiy2017(
             break;
     }
 
-    if (number_of_compulsory_items == 0
-            && number_of_unprofitable_items == 0) {
+    if (compulsory_items.empty()
+            && unprofitable_items.empty()) {
         return false;
     }
 
@@ -530,8 +524,8 @@ bool Instance::reduce_polyakovskiy2017(
     new_unreduction_info.mandatory_items = unreduction_info_.mandatory_items;
     // Create new instance and compute unreduction_operations.
     ItemId new_number_of_items = number_of_items()
-        - number_of_compulsory_items
-        - number_of_unprofitable_items;
+        - compulsory_items.size()
+        - unprofitable_items.size();
     InstanceBuilder new_instance_builder;
     new_instance_builder.add_cities(number_of_cities());
     new_unreduction_info.unreduction_operations = std::vector<ItemId>(new_number_of_items);
@@ -545,21 +539,18 @@ bool Instance::reduce_polyakovskiy2017(
     new_instance_builder.set_capacity(capacity_);
 
     // Update mandatory_items.
-    for (ItemId item_id = 0;
-            item_id < (ItemId)compulsory_items.size();
-            ++item_id) {
-        if (compulsory_items[item_id] == 1) {
-            const Item& item = this->item(item_id);
-            new_instance_builder.add_weight(item.city_id, item.weight);
-            ItemId orig_item_id = unreduction_info_.unreduction_operations[item_id];
-            new_unreduction_info.mandatory_items.push_back(orig_item_id);
-        }
+    for (ItemId item_id: compulsory_items) {
+        const Item& item = this->item(item_id);
+        new_instance_builder.add_weight(item.city_id, item.weight);
+        ItemId orig_item_id = unreduction_info_.unreduction_operations[item_id];
+        new_unreduction_info.mandatory_items.push_back(orig_item_id);
     }
 
     // Add items.
     ItemId new_item_id = 0;
     for (ItemId item_id = 0; item_id < this->number_of_items(); ++item_id) {
-        if (compulsory_items[item_id] == 0 && unprofitable_items[item_id] == 0){
+        if (!compulsory_items.contains(item_id)
+                && !unprofitable_items.contains(item_id)) {
             const Item& item = this->item(item_id);
             if (new_item_id == -1)
                 continue;
