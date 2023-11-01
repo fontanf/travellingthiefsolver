@@ -17,44 +17,44 @@ Authors:
 
 ### Travelling thief problem
 
-* Tree search (dynamic programming) implemented with [fontanf/treesearchsolver](https://github.com/fontanf/treesearchsolver) `-a tree_search`
+* Tree search (dynamic programming) implemented with [fontanf/treesearchsolver](https://github.com/fontanf/treesearchsolver) `-a tree-search`
   * Exact algorithm, for very small problems (~10 cities)
 
-* Local search implemented with the sequencing module from [fontanf/localsearchsolver](https://github.com/fontanf/localsearchsolver) `-a local_search`
+* Local search implemented with the sequencing module from [fontanf/localsearchsolver](https://github.com/fontanf/localsearchsolver) `-a local-search`
   * Returns very good solutions but only practical for small problems (< 100 cities)
 
-* Efficient local search implemented with [fontanf/localsearchsolver](https://github.com/fontanf/localsearchsolver) (but not using the sequecing module) `-a efficient_genetic_local_search`
+* Efficient local search implemented with [fontanf/localsearchsolver](https://github.com/fontanf/localsearchsolver) (but not using the sequecing module) `-a efficient-genetic-local-search`
   * Returns good solutions for medium problems (< 1000 cities)
 
-* Iterative TSP PWT TTP `-a iterative_tsp_pwt_ttp`
+* Iterative TSP PWT TTP `-a iterative-tsp-pwt-ttp`
   * Returns good solutions for large problems (< 10000 cities)
 
-* Iterative TSP PWT `-a iterative_tsp_pwt`
+* Iterative TSP PWT `-a iterative-tsp-pwt`
   * Quickly returns solutions for very large problems (> 10000 cities)
 
 ### Packing while travelling problem
 
-* Dynamic programming `-a dynamic_programming`
+* Dynamic programming `-a dynamic-programming`
   * Exact algorithm, for small problems
 
-* Sequential value correction `-a sequential_value_correction`
+* Sequential value correction `-a sequential-value-correction`
   * Very fast, a few seconds for very large problems
   * Works well when the capacity constraint is active
 
-* Efficient local search `-a efficient_local_search`
+* Efficient local search `-a efficient-local-search`
   * Fast, about a hundred seconds for very large problems
   * Works well when the capacity constraint is not active
 
 ### Travelling while packing problem
 
-* Local search implemented with the sequencing module from [fontanf/localsearchsolver](https://github.com/fontanf/localsearchsolver) `-a local_search`
+* Local search implemented with the sequencing module from [fontanf/localsearchsolver](https://github.com/fontanf/localsearchsolver) `-a local-search`
 
 ### Thief orienteering problem
 
-* Tree search (dynamic programming) implemented with [fontanf/treesearchsolver](https://github.com/fontanf/treesearchsolver) `-a tree_search`
+* Tree search (dynamic programming) implemented with [fontanf/treesearchsolver](https://github.com/fontanf/treesearchsolver) `-a tree-search`
   * Exact algorithm, for very small problems (~10 cities)
 
-* Local search implemented with the sequencing module from [fontanf/localsearchsolver](https://github.com/fontanf/localsearchsolver) `-a local_search`
+* Local search implemented with the sequencing module from [fontanf/localsearchsolver](https://github.com/fontanf/localsearchsolver) `-a local-search`
   * Returns very good solutions but only practical for small problems (< 100 cities)
 
 ## Usage (command line)
@@ -67,7 +67,7 @@ bazel build -- //...
 Examples:
 
 ```shell
-./bazel-bin/travellingthiefsolver/main -v 1 -i "data/travellingthief/gecco2023/fnl4461_n4460_bounded-strongly-corr_01.ttp" -a "iterative_tsp_pwt_ttp" -t 600
+./bazel-bin/travellingthiefsolver/main -v 1 -i "data/travellingthief/gecco2023/fnl4461_n4460_bounded-strongly-corr_01.ttp" -a "iterative-tsp-pwt-ttp" -t 600
 ```
 ```
 =====================================

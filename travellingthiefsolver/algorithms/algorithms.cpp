@@ -20,29 +20,29 @@ Output travellingthiefsolver::run(
     if (algorithm.empty() || algorithm_args[0].empty()) {
         throw std::invalid_argument("Missing algorithm.");
 
-    } else if (algorithm_args[0] == "tree_search") {
+    } else if (algorithm_args[0] == "tree-search") {
         return tree_search(instance, info);
 
-    } else if (algorithm_args[0] == "local_search") {
+    } else if (algorithm_args[0] == "local-search") {
         return local_search(instance, info);
 
-    } else if (algorithm_args[0] == "efficient_local_search") {
+    } else if (algorithm_args[0] == "efficient-local-search") {
         EfficientLocalSearchOptionalParameters parameters;
         parameters.info = info;
         parameters.initial_solution = &initial_solution;
         return efficient_local_search(instance, generator, parameters);
 
-    } else if (algorithm_args[0] == "efficient_genetic_local_search") {
+    } else if (algorithm_args[0] == "efficient-genetic-local-search") {
         EfficientLocalSearchOptionalParameters parameters;
         parameters.info = info;
         return efficient_genetic_local_search(instance, generator, parameters);
 
-    } else if (algorithm_args[0] == "iterative_tsp_pwt") {
+    } else if (algorithm_args[0] == "iterative-tsp-pwt") {
         IterativeTspPwtOptionalParameters parameters;
         parameters.info = info;
         return iterative_tsp_pwt(instance, generator, parameters);
 
-    } else if (algorithm_args[0] == "iterative_tsp_pwt_ttp") {
+    } else if (algorithm_args[0] == "iterative-tsp-pwt-ttp") {
         IterativeTspPwtTtpOptionalParameters parameters;
         parameters.info = info;
         return iterative_tsp_pwt_ttp(instance, generator, parameters);

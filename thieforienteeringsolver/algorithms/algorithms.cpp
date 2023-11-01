@@ -12,6 +12,8 @@ Output thieforienteeringsolver::run(
         std::mt19937_64& generator,
         optimizationtools::Info info)
 {
+    (void)generator;
+    (void)initial_solution;
     std::vector<std::string> algorithm_args = po::split_unix(algorithm);
     std::vector<char*> algorithm_argv;
     for (Counter i = 0; i < (Counter)algorithm_args.size(); ++i)
@@ -20,10 +22,10 @@ Output thieforienteeringsolver::run(
     if (algorithm.empty() || algorithm_args[0].empty()) {
         throw std::invalid_argument("Missing algorithm.");
 
-    } else if (algorithm_args[0] == "tree_search") {
+    } else if (algorithm_args[0] == "tree-search") {
         return tree_search(instance, info);
 
-    } else if (algorithm_args[0] == "local_search") {
+    } else if (algorithm_args[0] == "local-search") {
         return local_search(instance, info);
 
     } else {

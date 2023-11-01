@@ -22,7 +22,7 @@ Output travellingwhilepackingsolver::run(
     if (algorithm.empty() || algorithm_args[0].empty()) {
         throw std::invalid_argument("Missing algorithm.");
 
-    } else if (algorithm_args[0] == "local_search") {
+    } else if (algorithm_args[0] == "local-search") {
         return local_search(instance, info);
 
     } else {

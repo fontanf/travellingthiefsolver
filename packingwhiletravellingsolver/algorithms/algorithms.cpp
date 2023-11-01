@@ -27,22 +27,22 @@ Output packingwhiletravellingsolver::run(
         parameters.info = info;
         return greedy(instance, parameters);
 
-    } else if (algorithm_args[0] == "sequential_value_correction") {
+    } else if (algorithm_args[0] == "sequential-value-correction") {
         SequentialValueCorrectionOptionalParameters parameters;
         parameters.info = info;
         return sequential_value_correction(instance, parameters);
 
-    } else if (algorithm_args[0] == "dynamic_programming") {
+    } else if (algorithm_args[0] == "dynamic-programming") {
         DynamicProgrammingOptionalParameters parameters;
         parameters.info = info;
         return dynamic_programming(instance, parameters);
 
-    } else if (algorithm_args[0] == "efficient_local_search") {
+    } else if (algorithm_args[0] == "efficient-local-search") {
         EfficientLocalSearchOptionalParameters parameters;
         parameters.info = info;
         return efficient_local_search(instance, parameters);
 
-    } else if (algorithm_args[0] == "large_neighborhood_search") {
+    } else if (algorithm_args[0] == "large-neighborhood-search") {
         LargeNeighborhoodSearchOptionalParameters parameters;
         parameters.info = info;
         return large_neighborhood_search(instance, generator, parameters);
