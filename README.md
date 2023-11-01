@@ -67,12 +67,16 @@ bazel build -- //...
 Examples:
 
 ```shell
-./bazel-bin/travellingthiefsolver/main -v 1 -i "data/travellingthief/gecco2023/fnl4461_n4460_bounded-strongly-corr_01.ttp" -a "iterative-tsp-pwt-ttp" -t 600
+./bazel-bin/travellingthiefsolver/travellingthief/main -v 1 -i "data/travellingthief/gecco2023/fnl4461_n4460_bounded-strongly-corr_01.ttp" -a "iterative-tsp-pwt-ttp" -t 600
 ```
 ```
 =====================================
-       Travelling thief solver       
+        TravellingThiefSolver        
 =====================================
+
+Problem
+-------
+Travelling thief problem
 
 Instance
 --------
@@ -92,39 +96,38 @@ Iterative TSP PWT TTP
 
        T (s)    Distance        Cost     # items      Profit   Objective                 Comment
        -----    --------        ----     -------      ------   ---------                 -------
-       0.000           0           0           0           0           0                        
-       1.104      185572      323053        1008      581050      257997           initial svc 0
-       2.129      185527      326869        1021      584950      258081           initial svc 1
-       3.072      185486      322610        1023      581850      259240           initial svc 2
-      12.588      185815      320024        1017      580449      260425          initial ttpels
-      17.923      185986      322604        1018      583649      261045          initial ttpels
-      30.466      186084      323040        1010      584950      261910          initial ttpels
-     187.060      186040      321531        1010      584050      262519   iteration 26 (ttpels)
-     247.484      185837      323100        1028      585950      262850   iteration 53 (ttpels)
-     344.162      186015      320678        1027      584548      263870  iteration 113 (ttpels)
+       0.003           0           0           0           0           0                        
+       1.022      185572      323053        1008      581050      257997           initial svc 0
+       2.031      185527      326869        1021      584950      258081           initial svc 1
+       2.966      185486      322610        1023      581850      259240           initial svc 2
+      18.614      185815      320024        1017      580449      260425          initial ttpels
+      28.648      185986      322604        1018      583649      261045          initial ttpels
+      52.541      186206      323108        1011      584650      261542          initial ttpels
+     260.383      185837      322384        1022      584350      261966    iteration 8 (ttpels)
+     326.622      186310      319930        1020      583243      263313   iteration 16 (ttpels)
 
 Final statistics
 ----------------
-Value:                        263870
+Value:                        263313
 Bound:                        inf
 Absolute optimality gap:      inf
 Relative optimality gap (%):  -nan
-Time (s):                     600.42
-Number of SVC calls:          698
-Number of ELS calls:          50
-TSP time:                     275.251
-PWT time:                     39.4937
-TTP time:                     285.517
+Time (s):                     600.479
+Number of SVC calls:          226
+Number of ELS calls:          40
+TSP time:                     90.7668
+PWT time:                     14.5937
+TTP time:                     495.084
 
 Solution
 --------
 Number of vertices:  4461 / 4461 (100%)
-Distance:            186015
-Travel time:         229056
-Renting cost:        320678
-Number of items:     1027 / 4460 (23.0269%)
-Item weight:         387148 / 387150 (99.9995%)
-Item profit:         584548
+Distance:            186310
+Travel time:         228521
+Renting cost:        319930
+Number of items:     1020 / 4460 (22.87%)
+Item weight:         387143 / 387150 (99.9982%)
+Item profit:         583243
 Feasible:            1
-Objective:           263870
+Objective:           263313
 ```
