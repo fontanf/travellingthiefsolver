@@ -6,12 +6,14 @@ cc_library(
                 "instance.hpp",
                 "instance_builder.hpp",
                 "solution.hpp",
+                "solution_builder.hpp",
                 "utils.hpp",
         ],
         srcs = [
                 "instance.cpp",
                 "instance_builder.cpp",
                 "solution.cpp",
+                "solution_builder.cpp",
                 "utils.cpp",
         ],
         deps = [

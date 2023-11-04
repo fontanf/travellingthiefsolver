@@ -1,5 +1,6 @@
 #include "travellingthiefsolver/packingwhiletravelling/algorithms/efficient_local_search.hpp"
 
+#include "travellingthiefsolver/packingwhiletravelling/solution_builder.hpp"
 #include "travellingthiefsolver/packingwhiletravelling/utils.hpp"
 
 #include "travellingthiefsolver/packingwhiletravelling/algorithms/sequential_value_correction.hpp"
@@ -199,15 +200,15 @@ Solution efficient_local_search_initial_solution(
         EfficientLocalSearchOptionalParameters parameters)
 {
     if (parameters.initial_solution != nullptr) {
-        std::vector<uint8_t> items(instance.number_of_items());
+        SolutionBuilder solution_builder(instance);
         for (ItemId item_id = 0;
                 item_id < instance.number_of_items();
                 ++item_id) {
             ItemId orig_item_id = instance.unreduction_info().unreduction_operations[item_id];
             if (parameters.initial_solution->contains(orig_item_id))
-                items[item_id] = 1;
+                solution_builder.add_item(item_id);
         }
-        return Solution(instance, items);
+        return solution_builder.build();
     } else {
         auto svc_output = travellingthiefsolver::packingwhiletravelling::sequential_value_correction(
                 instance);
@@ -317,18 +318,21 @@ EfficientLocalSearchOutput travellingthiefsolver::packingwhiletravelling::effici
         }
     }
 
-    std::vector<uint8_t> items(instance.number_of_items());
+    SolutionBuilder solution_builder(instance);
     for (CityId city_id = 0;
             city_id < instance.number_of_cities();
             ++city_id) {
         CityStateId city_state_id = solution.city_states[city_id];
         for (ItemId item_id: city_states[city_id][city_state_id].item_ids)
-            items[item_id] = 1;
+            solution_builder.add_item(item_id);
     }
 
     // Update output.
     std::stringstream ss;
-    output.update_solution(Solution(instance, items), ss, parameters.info);
+    output.update_solution(
+            solution_builder.build(),
+            ss,
+            parameters.info);
 
     output.algorithm_end(parameters.info);
     return output;

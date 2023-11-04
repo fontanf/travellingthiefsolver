@@ -1,5 +1,7 @@
 #include "travellingthiefsolver/packingwhiletravelling/algorithms/greedy.hpp"
 
+#include "travellingthiefsolver/packingwhiletravelling/solution_builder.hpp"
+
 #include <limits>
 #include <iostream>
 
@@ -90,12 +92,12 @@ Output travellingthiefsolver::packingwhiletravelling::greedy(
     }
 
     // Add items while it is possible/profitable
-    std::vector<uint8_t> packing_plan(instance.number_of_items(), 0);
+    SolutionBuilder solution_builder(instance);
     Weight weight = instance.city_weight();
     for (ItemId item_id: sorted_item_ids) {
         if (weight + instance.item(item_id).weight <= instance.capacity()) {
             // Add the item to knapsack
-            packing_plan[item_id] = 1;
+            solution_builder.add_item(item_id);
             weight += instance.item(item_id).weight;
         }
 
@@ -103,13 +105,15 @@ Output travellingthiefsolver::packingwhiletravelling::greedy(
             break;
         }
     }
-
-    Solution solution(instance, packing_plan);
+    Solution solution = solution_builder.build();
 
     // Update output.
     std::stringstream ss;
     ss << "greedy solution";
-    output.update_solution(solution, ss, parameters.info);
+    output.update_solution(
+            solution,
+            ss,
+            parameters.info);
 
     return output.algorithm_end(parameters.info);
 }

@@ -1,5 +1,7 @@
 #include "travellingthiefsolver/packingwhiletravelling/algorithms/sequential_value_correction.hpp"
 
+#include "travellingthiefsolver/packingwhiletravelling/solution_builder.hpp"
+
 #include "knapsacksolver/algorithms/dynamic_programming_primal_dual.hpp"
 
 using namespace travellingthiefsolver::packingwhiletravelling;
@@ -38,16 +40,16 @@ Solution solve(
     //std::cout << "kp " << kp_output.solution.profit() << std::endl;
 
     // Retrieve solution.
-    std::vector<uint8_t> items(instance.number_of_items(), 0);
+    SolutionBuilder solution_builder(instance);
     for (knapsacksolver::ItemIdx kp_item_id = 0;
             kp_item_id < kp_instance.number_of_items();
             ++kp_item_id) {
         if (kp_output.solution.contains_idx(kp_item_id)) {
             ItemId item_id = kp2pwt[kp_item_id];
-            items[item_id] = 1;
+            solution_builder.add_item(item_id);
         }
     }
-    Solution solution(instance, items);
+    Solution solution = solution_builder.build();
     //std::cout << "solution"
     //    << " profit " << solution.item_profit()
     //    << " cost " << solution.renting_cost()

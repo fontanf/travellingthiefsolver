@@ -1,6 +1,7 @@
 #include "travellingthiefsolver/packingwhiletravelling/algorithms/large_neighborhood_search.hpp"
 
 #include "travellingthiefsolver/packingwhiletravelling/instance_builder.hpp"
+#include "travellingthiefsolver/packingwhiletravelling/solution_builder.hpp"
 #include "travellingthiefsolver/packingwhiletravelling/algorithms/greedy.hpp"
 #include "travellingthiefsolver/packingwhiletravelling/algorithms/sequential_value_correction.hpp"
 
@@ -174,20 +175,20 @@ LargeNeighborhoodSearchOutput travellingthiefsolver::packingwhiletravelling::lar
         Solution new_solution = sequential_value_correction(new_instance, svc_parameters).solution;
 
         // Retrieve solution.
-        std::vector<uint8_t> items(instance.number_of_items());
+        SolutionBuilder solution_builder(instance);
         // Add fixed items.
         for (ItemId item_id: fixed_items)
-            items[item_id] = 1;
+            solution_builder.add_item(item_id);
         // Add items from the solution of the new instance.
         for (ItemId new_item_id = 0;
                 new_item_id < new_instance.number_of_items();
                 ++new_item_id) {
             if (new_solution.contains(new_item_id)) {
                 ItemId item_id = items_new2orig[new_item_id];
-                items[item_id] = 1;
+                solution_builder.add_item(item_id);
             }
         }
-        Solution solution(instance, items);
+        Solution solution = solution_builder.build();
 
         // Update output.
         std::stringstream ss;

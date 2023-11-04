@@ -1,5 +1,6 @@
 #include "travellingthiefsolver/packingwhiletravelling/algorithms/algorithms.hpp"
 #include "travellingthiefsolver/packingwhiletravelling/instance_builder.hpp"
+#include "travellingthiefsolver/packingwhiletravelling/solution_builder.hpp"
 
 #include <boost/program_options.hpp>
 
@@ -73,7 +74,10 @@ int main(int argc, char *argv[])
         ;
 
     std::mt19937_64 generator(seed);
-    Solution solution(instance, initial_solution_path);
+
+    SolutionBuilder solution_builder(instance);
+    solution_builder.read(initial_solution_path);
+    Solution solution = solution_builder.build();
 
     run(
             algorithm,

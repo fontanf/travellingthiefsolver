@@ -1,52 +1,8 @@
 #include "travellingthiefsolver/packingwhiletravelling/solution.hpp"
 
+#include "travellingthiefsolver/packingwhiletravelling/solution_builder.hpp"
+
 using namespace travellingthiefsolver::packingwhiletravelling;
-
-Solution::Solution(
-        const Instance& instance,
-        const std::vector<uint8_t>& items):
-    instance_(&instance),
-    items_is_selected_(items)
-{
-    item_weight_ += instance.city(0).weight;
-    for (ItemId item_id: instance.city(0).item_ids) {
-        if (items[item_id]) {
-            const Item& item = instance.item(item_id);
-            item_weight_ += item.weight;
-            item_profit_ += item.profit;
-            item_ids_.push_back(item_id);
-        }
-    }
-    for (CityId city_id = 1; city_id < instance.number_of_cities(); ++city_id) {
-        travel_time_ += instance.duration(city_id, item_weight_);
-        item_weight_ += instance.city(city_id).weight;
-        for (ItemId item_id: instance.city(city_id).item_ids) {
-            if (items[item_id]) {
-                const Item& item = instance.item(item_id);
-                item_weight_ += item.weight;
-                item_profit_ += item.profit;
-                item_ids_.push_back(item_id);
-            }
-        }
-    }
-    travel_time_ += instance.duration(0, item_weight_);
-}
-
-Solution::Solution(
-        const Instance& instance,
-        std::string certificate_path)
-{
-    if (certificate_path.empty())
-        return;
-    std::ifstream file(certificate_path);
-    if (!file.good()) {
-        throw std::runtime_error(
-                "Unable to open file \"" + certificate_path + "\".");
-    }
-
-    (void)instance;
-    // TODO
-}
 
 void Solution::update(const Solution& solution)
 {
@@ -58,19 +14,19 @@ void Solution::update(const Solution& solution)
 
     if (solution.instance().is_reduced()
             && solution.instance().original_instance() == &instance()) {
-        std::vector<uint8_t> items(instance().number_of_items(), 0);
+        SolutionBuilder solution_builder(instance());
         for (ItemId item_id: solution.instance().unreduction_info().mandatory_items) {
-            items[item_id] = 1;
+            solution_builder.add_item(item_id);
         }
         for (ItemId item_id = 0;
                 item_id < solution.instance().number_of_items();
                 ++item_id) {
             if (solution.contains(item_id)) {
                 ItemId item_id_2 = solution.instance().unreduction_info().unreduction_operations[item_id];
-                items[item_id_2] = 1;
+                solution_builder.add_item(item_id_2);
             }
         }
-        *this = Solution(instance(), items);
+        *this = solution_builder.build();
         if (item_profit() != solution.item_profit() + solution.instance().unreduction_info().extra_profit) {
             throw std::runtime_error(
                     "Wrong profit after unreduction. Weight: "
@@ -169,7 +125,7 @@ bool Solution::is_strictly_better_than(const Solution& solution) const
 Output::Output(
         const Instance& instance,
         optimizationtools::Info& info):
-    solution(instance, std::vector<uint8_t>(instance.number_of_items(), 0))
+    solution(SolutionBuilder(instance).build())
 {
     info.os()
         << std::setw(12) << "T (s)"

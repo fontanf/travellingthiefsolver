@@ -21,16 +21,6 @@ public:
      * Constructors and destructor.
      */
 
-    /** Create a solution from a bitset of items. */
-    Solution(
-            const Instance& instance,
-            const std::vector<uint8_t>& items);
-
-    /** Create a solution from a certificate file. */
-    Solution(
-            const Instance& instance,
-            std::string certificate_path);
-
     void update(const Solution& solution);
 
     /*
@@ -86,7 +76,13 @@ public:
 private:
 
     /*
-     * Private attributes.
+     * Private methods
+     */
+
+    Solution() { }
+
+    /*
+     * Private attributes
      */
 
     /** Instance. */
@@ -120,6 +116,8 @@ private:
      * This time takes into account the return to the depot.
      */
     Time travel_time_ = 0;
+
+    friend class SolutionBuilder;
 
 };
 

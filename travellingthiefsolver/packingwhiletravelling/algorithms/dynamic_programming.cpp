@@ -1,5 +1,7 @@
 #include "travellingthiefsolver/packingwhiletravelling/algorithms/dynamic_programming.hpp"
 
+#include "travellingthiefsolver/packingwhiletravelling/solution_builder.hpp"
+
 using namespace travellingthiefsolver::packingwhiletravelling;
 
 Output travellingthiefsolver::packingwhiletravelling::dynamic_programming(
@@ -144,7 +146,7 @@ Output travellingthiefsolver::packingwhiletravelling::dynamic_programming(
     }
 
     // backtracking
-    std::vector<u_int8_t> items(instance.number_of_items(), 0);
+    SolutionBuilder solution_builder(instance);
     Weight current_weight = optimal_weight;
     for (ItemId row = number_of_rows - 1; row > 0; --row) {
         if (rows[row].first) {
@@ -156,16 +158,15 @@ Output travellingthiefsolver::packingwhiletravelling::dynamic_programming(
             ItemId item_id = rows[row].second;
             if (beta[row][current_weight]
                     == beta[row - 1][current_weight]) {
-                items[item_id] = 0;
             } else {
-                items[item_id] = 1;
+                solution_builder.add_item(item_id);
                 current_weight -= instance.item(item_id).weight;
             }
         }
     }
 
     // create the solution
-    Solution solution(instance, items);
+    Solution solution = solution_builder.build();
 
     // Update output.
     std::stringstream ss;
