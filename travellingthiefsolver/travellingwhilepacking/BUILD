@@ -4,16 +4,19 @@ cc_library(
         name = "travellingwhilepackingsolver",
         hdrs = [
                 "instance.hpp",
+                "instance_builder.hpp",
                 "solution.hpp",
         ],
         srcs = [
                 "instance.cpp",
+                "instance_builder.cpp",
                 "solution.cpp",
         ],
         deps = [
                 "@optimizationtools//optimizationtools/utils:info",
                 "@optimizationtools//optimizationtools/utils:utils",
                 "@optimizationtools//optimizationtools/containers:containers",
+                "@travelingsalesmansolver//travelingsalesmansolver:distances",
         ],
         visibility = ["//visibility:public"],
 )

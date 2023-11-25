@@ -1,10 +1,10 @@
 #pragma once
 
-#include "travellingthiefsolver/travellingthief/instance.hpp"
+#include "travellingthiefsolver/travellingwhilepacking/instance.hpp"
 
 namespace travellingthiefsolver
 {
-namespace travellingthief
+namespace travellingwhilepacking
 {
 
 class InstanceBuilder
@@ -42,11 +42,10 @@ public:
     /** Set the capacity of the knapsack. */
     void set_capacity(Weight capacity) { instance_.capacity_ = capacity; }
 
-    /** Add an item. */
-    void add_item(
+    /** Set the weight of a city. */
+    void set_weight(
             CityId city_id,
-            Weight weight,
-            Profit profit);
+            Weight weight);
 
     /*
      * Build

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "travellingthiefsolver/travellingthief/instance.hpp"
+#include "travellingthiefsolver/thieforienteering/instance.hpp"
 
 namespace travellingthiefsolver
 {
-namespace travellingthief
+namespace thieforienteering
 {
 
 class InstanceBuilder
@@ -15,7 +15,7 @@ public:
     /** Constructor. */
     InstanceBuilder() { }
 
-    /** Read an instance from a file. */
+    /** Create an instance from a file. */
     void read(
             std::string instance_path,
             std::string format);
@@ -36,8 +36,8 @@ public:
     /** Set the maximum speed. */
     void set_maximum_speed(double maximum_speed) { instance_.speed_max_ = maximum_speed; }
 
-    /** Set the renting ratio. */
-    void set_renting_ratio(double renting_ratio) { instance_.renting_ratio_ = renting_ratio; }
+    /** Set the time limit. */
+    void set_time_limit(double time_limit) { instance_.time_limit_ = time_limit; }
 
     /** Set the capacity of the knapsack. */
     void set_capacity(Weight capacity) { instance_.capacity_ = capacity; }

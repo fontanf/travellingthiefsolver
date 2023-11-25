@@ -38,8 +38,9 @@ int main(int argc, char *argv[])
     }
 
     // Read instance.
-    InstanceBuilder instance_builder(instance_path, format);
-    Instance instance = instance_builder.build();
+    InstanceBuilder instance_builder;
+    instance_builder.read(instance_path, format);
+    const Instance instance = instance_builder.build();
 
     // Read solution.
     Solution solution(instance, certificate_path);

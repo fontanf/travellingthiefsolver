@@ -45,7 +45,7 @@ local_repository(
 git_repository(
     name = "travelingsalesmansolver",
     remote = "https://github.com/fontanf/travelingsalesmansolver.git",
-    commit = "1eacbfbc2e0107b80c524345744bcdca183ba4ca",
+    commit = "20ea06dda1d11881bcd037e3877b97b90c8371af",
 )
 
 local_repository(

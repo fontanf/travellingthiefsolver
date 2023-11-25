@@ -1,3 +1,4 @@
+#include "travellingthiefsolver/thieforienteering/instance_builder.hpp"
 #include "travellingthiefsolver/thieforienteering/algorithms/algorithms.hpp"
 
 #include <boost/program_options.hpp>
@@ -55,7 +56,9 @@ int main(int argc, char *argv[])
 
     // Run algorithm
 
-    Instance instance(instance_path, format);
+    InstanceBuilder instance_builder;
+    instance_builder.read(instance_path, format);
+    const Instance instance = instance_builder.build();
 
     optimizationtools::Info info = optimizationtools::Info()
         .set_verbosity_level(verbosity_level)

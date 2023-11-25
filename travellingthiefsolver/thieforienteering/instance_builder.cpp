@@ -1,8 +1,8 @@
-#include "travellingthiefsolver/travellingthief/instance_builder.hpp"
+#include "travellingthiefsolver/thieforienteering/instance_builder.hpp"
 
 #include "travelingsalesmansolver/distances_builder.hpp"
 
-using namespace travellingthiefsolver::travellingthief;
+using namespace travellingthiefsolver::thieforienteering;
 
 void InstanceBuilder::add_cities(CityId number_of_cities)
 {
@@ -75,12 +75,12 @@ void InstanceBuilder::read_polyakovskiy2014(std::ifstream& file)
             number_of_items = std::stol(line.back());
         } else if (tmp.rfind("CAPACITY OF KNAPSACK", 0) == 0) {
             set_capacity(std::stol(line.back()));
+        } else if (tmp.rfind("MAX TIME", 0) == 0) {
+            set_time_limit(std::stol(line.back()));
         } else if (tmp.rfind("MIN SPEED", 0) == 0) {
             set_minimum_speed(std::stod(line.back()));
         } else if (tmp.rfind("MAX SPEED", 0) == 0) {
             set_maximum_speed(std::stod(line.back()));
-        } else if (tmp.rfind("RENTING RATIO", 0) == 0) {
-            set_renting_ratio(std::stod(line.back()));
         } else if (tmp.rfind("ITEMS SECTION", 0) == 0) {
             ItemId tmp = -1;
             Profit profit = -1;

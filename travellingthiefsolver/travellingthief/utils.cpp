@@ -1,6 +1,8 @@
 #include "travellingthiefsolver/travellingthief/utils.hpp"
 
-#include "travelingsalesmansolver/instance_builder.hpp"
+#include "travellingthiefsolver/travellingwhilepacking/instance_builder.hpp"
+
+#include "travelingsalesmansolver/distances_builder.hpp"
 #include "travelingsalesmansolver/algorithms/lkh.hpp"
 
 using namespace travellingthiefsolver::travellingthief;
@@ -8,33 +10,7 @@ using namespace travellingthiefsolver::travellingthief;
 travelingsalesmansolver::Instance travellingthiefsolver::travellingthief::create_tsp_instance(
         const Instance& instance)
 {
-    travelingsalesmansolver::InstanceBuilder tsp_instance_builder;
-    tsp_instance_builder.add_vertices(instance.number_of_cities());
-    tsp_instance_builder.set_edge_weight_type(instance.edge_weight_type());
-    tsp_instance_builder.set_node_coord_type(instance.node_coord_type());
-    // Set coordiantes.
-    for (travelingsalesmansolver::VertexId vertex_id = 0;
-            vertex_id < instance.number_of_cities();
-            ++vertex_id) {
-        const City& city = instance.city(vertex_id);
-        tsp_instance_builder.set_coordinates(vertex_id, city.x, city.y, city.z);
-    }
-    // Set distances.
-    if (instance.edge_weight_type() == "EXPLICIT") {
-        for (travelingsalesmansolver::VertexId vertex_id_1 = 0;
-                vertex_id_1 < instance.number_of_cities();
-                ++vertex_id_1) {
-            for (travelingsalesmansolver::VertexId vertex_id_2 = 0;
-                    vertex_id_2 < instance.number_of_cities();
-                    ++vertex_id_2) {
-                tsp_instance_builder.set_distance(
-                        vertex_id_1,
-                        vertex_id_2,
-                        instance.distance(vertex_id_1, vertex_id_2));
-            }
-        }
-    }
-    return tsp_instance_builder.build();
+    return travelingsalesmansolver::Instance(instance.distances_ptr());
 }
 
 Solution travellingthiefsolver::travellingthief::retrieve_solution(
@@ -88,7 +64,7 @@ travellingthiefsolver::packingwhiletravelling::Instance travellingthiefsolver::t
         CityId city_id_2 = solution_pred.city_id(pwt_city_id);
         pwt_instance_builder.set_distance(
                 pwt_city_id,
-                instance.distance(city_id_1, city_id_2));
+                instance.distances().distance(city_id_1, city_id_2));
     }
     // Add items.
     for (ItemId item_id = 0;
@@ -134,11 +110,12 @@ travellingthiefsolver::travellingwhilepacking::Instance travellingthiefsolver::t
         const Instance& instance,
         const Solution& solution_pred)
 {
-    travellingwhilepacking::Instance twp_instance(instance.distances());
-    twp_instance.set_capacity(instance.capacity());
-    twp_instance.set_minimum_speed(instance.minimum_speed());
-    twp_instance.set_maximum_speed(instance.maximum_speed());
-    twp_instance.set_renting_ratio(instance.renting_ratio());
+    travellingwhilepacking::InstanceBuilder twp_instance_builder;
+    twp_instance_builder.set_distances(instance.distances_ptr());
+    twp_instance_builder.set_capacity(instance.capacity());
+    twp_instance_builder.set_minimum_speed(instance.minimum_speed());
+    twp_instance_builder.set_maximum_speed(instance.maximum_speed());
+    twp_instance_builder.set_renting_ratio(instance.renting_ratio());
     // Set city weights.
     std::vector<Weight> weights(instance.number_of_cities(), 0);
     for (ItemId item_id = 0; item_id < instance.number_of_items(); ++item_id) {
@@ -148,7 +125,9 @@ travellingthiefsolver::travellingwhilepacking::Instance travellingthiefsolver::t
         }
     }
     for (CityId city_id = 0; city_id < instance.number_of_cities(); ++city_id)
-        twp_instance.set_weight(city_id, weights[city_id]);
+        twp_instance_builder.set_weight(city_id, weights[city_id]);
+    const travellingwhilepacking::Instance twp_instance = twp_instance_builder.build();
+
     if (twp_instance.total_weight() > twp_instance.capacity()) {
         throw std::runtime_error(
                 "twp_instance.total_weight() > twp_instance.capacity()");

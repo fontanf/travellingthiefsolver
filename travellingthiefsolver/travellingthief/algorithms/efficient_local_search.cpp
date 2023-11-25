@@ -193,6 +193,7 @@ EfficientLocalSearchSolution::EfficientLocalSearchSolution(
 {
     if (city_ids.size() == 1)
         return;
+    const travelingsalesmansolver::Distances& distances = instance.distances();
 
     CityId city_id_prev = 0;
     for (CityPos city_pos = 1;
@@ -216,7 +217,7 @@ EfficientLocalSearchSolution::EfficientLocalSearchSolution(
         EfficientLocalSearchSolutionVisit visit;
         visit.city_id = city_id;
 
-        Distance distance = instance.distance(city_id_prev, city_id);
+        Distance distance = distances.distance(city_id_prev, city_id);
         visit.distance_from_start = visit_prev.distance_from_start + distance;
         distance_ += distance;
 
@@ -238,7 +239,7 @@ EfficientLocalSearchSolution::EfficientLocalSearchSolution(
         city_id_prev = city_id;
     }
 
-    distance_ += instance.distance(city_id_prev, 0);
+    distance_ += distances.distance(city_id_prev, 0);
     travel_time_ += instance.duration(city_id_prev, 0, weight_);
 
     // Compute remining_times.
@@ -1301,11 +1302,11 @@ Profit EfficientLocalScheme::evaluate_two_opt_move(
             0:
             solution.visit(city_pos_2 + 1).city_id;
         // Two-opt 1 - A => 1 - 2.
-        remaining_distance -= instance_.distance(city_id_1, city_id_3);
-        remaining_distance += instance_.distance(city_id_1, city_id_2);
+        remaining_distance -= instance_.distances().distance(city_id_1, city_id_3);
+        remaining_distance += instance_.distances().distance(city_id_1, city_id_2);
         // Two-opt 2 - Y => A - Y.
-        remaining_distance -= instance_.distance(city_id_2, city_id_4);
-        remaining_distance += instance_.distance(city_id_3, city_id_4);
+        remaining_distance -= instance_.distances().distance(city_id_2, city_id_4);
+        remaining_distance += instance_.distances().distance(city_id_3, city_id_4);
     }
 
     double speed_1 = instance_.speed(solution.visit(city_pos_1).weight_from_start);
@@ -1331,7 +1332,7 @@ Profit EfficientLocalScheme::evaluate_two_opt_move(
         //        city_id_4,
         //        weight_cur)
         //    << std::endl;
-        remaining_distance -= instance_.distance(city_id_3, city_id_4);
+        remaining_distance -= instance_.distances().distance(city_id_3, city_id_4);
     }
 
     // Segment 1 - 2

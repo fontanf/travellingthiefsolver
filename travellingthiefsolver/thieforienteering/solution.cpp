@@ -11,7 +11,7 @@ Solution::Solution(const Instance& instance):
     city_ids_.push_back(0);
     cities_[0].in = true;
     cities_[instance.number_of_cities() - 1].in = true;
-    distance_ = distance_cur_ + instance.distance(
+    distance_ = distance_cur_ + instance.distances().distance(
             0,
             instance_->number_of_cities() - 1);
     travel_time_ = travel_time_cur_ + instance.duration(
@@ -81,8 +81,8 @@ void Solution::add_city(CityId city_id)
     CityId city_id_prev = city_ids_.back();
     city_ids_.push_back(city_id);
     cities_[city_id].in = true;
-    distance_cur_ += instance().distance(city_id_prev, city_id);
-    distance_ = distance_cur_ + instance().distance(
+    distance_cur_ += instance().distances().distance(city_id_prev, city_id);
+    distance_ = distance_cur_ + instance().distances().distance(
             city_id,
             instance_->number_of_cities() - 1);
     travel_time_cur_ += instance().duration(city_id_prev, city_id, item_weight_);
@@ -230,7 +230,7 @@ void Solution::write_csv(std::string output_path) const
         CityId city_id = this->city_id(city_pos);
         const City& city = instance().city(city_id);
         if (city_id_prev != -1)
-            distance += instance().distance(city_id_prev, city_id);
+            distance += instance().distances().distance(city_id_prev, city_id);
         for (ItemId item_id: city.item_ids)
             if (contains(item_id))
                 weight += instance().item(item_id).weight;

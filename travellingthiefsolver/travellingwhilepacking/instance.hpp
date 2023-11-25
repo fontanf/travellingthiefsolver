@@ -3,6 +3,8 @@
 #include "optimizationtools/utils/info.hpp"
 #include "optimizationtools/utils/utils.hpp"
 
+#include "travelingsalesmansolver/distances.hpp"
+
 #include <random>
 
 namespace travellingthiefsolver
@@ -24,15 +26,6 @@ using Seed = int64_t;
  */
 struct City
 {
-    /** x-coordinate. */
-    double x;
-
-    /** y-coordinate. */
-    double y;
-
-    /** z-coordinate. */
-    double z;
-
     /** Weight of the items retrieve at this city. */
     Weight weight;
 };
@@ -49,47 +42,6 @@ public:
      * Constructors and destructor
      */
 
-    /** Create an instance from a file. */
-    Instance(
-            std::string instance_path,
-            std::string format);
-
-    /** Create an instance manually. */
-    Instance(CityId number_of_cities = 0);
-
-    /** Create an instance manually. */
-    Instance(const std::vector<std::vector<Distance>>& distances);
-
-    /** Set the coordinates of a city. */
-    void set_xy(
-            CityId city_id,
-            double x,
-            double y,
-            double z = -1);
-
-    /** Set the distance between two cities. */
-    inline void set_distance(
-            CityId city_id_1,
-            CityId city_id_2,
-            Distance distance);
-
-    /** Set the minimum speed. */
-    void set_minimum_speed(double minimum_speed) { speed_min_ = minimum_speed; }
-
-    /** Set the maximum speed. */
-    void set_maximum_speed(double maximum_speed) { speed_max_ = maximum_speed; }
-
-    /** Set the renting ratio. */
-    void set_renting_ratio(double renting_ratio) { renting_ratio_ = renting_ratio; }
-
-    /** Set the capacity of the knapsack. */
-    void set_capacity(Weight capacity) { capacity_ = capacity; }
-
-    /** Set the weight of a city. */
-    void set_weight(
-            CityId city_id,
-            Weight weight);
-
     /*
      * Getters
      */
@@ -99,17 +51,6 @@ public:
 
     /** Get a city. */
     inline const City& city(CityId city_id) const { return cities_[city_id]; }
-
-    /** Get the x-coordinate of a city. */
-    inline double x(CityId city_id) const { return cities_[city_id].x; }
-
-    /** Get the y-coordinate of a city. */
-    inline double y(CityId city_id) const { return cities_[city_id].y; }
-
-    /** Get the distance between two cities. */
-    inline Distance distance(
-            CityId city_id_1,
-            CityId city_id_2) const;
 
     /** Get the duration between two cities. */
     inline Time duration(
@@ -125,6 +66,12 @@ public:
 
     /** Get the renting ratio. */
     inline double renting_ratio() const { return renting_ratio_; }
+
+    /** Get distances. */
+    const travelingsalesmansolver::Distances& distances() const { return *distances_; }
+
+    /** Get the shared pointer to the distances class. */
+    const std::shared_ptr<const travelingsalesmansolver::Distances>& distances_ptr() const { return distances_; }
 
     /*
      * Export
@@ -144,8 +91,8 @@ private:
      * Private methods
      */
 
-    /** Read an instance from a file in 'polyakovskiy2014' format. */
-    void read_polyakovskiy2014(std::ifstream& file);
+    /** Create an instance manually. */
+    Instance() { }
 
     /*
      * Private attributes
@@ -155,9 +102,7 @@ private:
     std::vector<City> cities_;
 
     /** Distances. */
-    std::vector<std::vector<Distance>> distances_0_;
-
-    const std::vector<std::vector<Distance>>* distances_;
+    std::shared_ptr<const travelingsalesmansolver::Distances> distances_;
 
     /** Minimum speed. */
     double speed_min_ = -1;
@@ -174,6 +119,8 @@ private:
     /** Capacity of the knapsack. */
     Weight capacity_ = -1;
 
+    friend class InstanceBuilder;
+
 };
 
 void init_display(
@@ -183,29 +130,6 @@ void init_display(
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// Inlined methods ////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-
-inline void Instance::set_distance(
-        CityId city_id_1,
-        CityId city_id_2,
-        Distance distance)
-{
-    if (city_id_1 > city_id_2) {
-        distances_0_[city_id_1][city_id_2] = distance;
-    } else {
-        distances_0_[city_id_2][city_id_1] = distance;
-    }
-}
-
-inline Distance Instance::distance(
-        CityId city_id_1,
-        CityId city_id_2) const
-{
-    if (city_id_1 > city_id_2) {
-        return (*distances_)[city_id_1][city_id_2];
-    } else {
-        return (*distances_)[city_id_2][city_id_1];
-    }
-}
 
 inline Time Instance::duration(
         CityId city_id_1,
@@ -218,7 +142,7 @@ inline Time Instance::duration(
     //            + "; capacity: " + std::to_string(capacity()) + ".");
     //}
     double speed = speed_max_ - (double)(weight * (speed_max_ - speed_min_)) / capacity();
-    return (double)distance(city_id_1, city_id_2) / speed;
+    return (double)distances().distance(city_id_1, city_id_2) / speed;
 }
 
 }

@@ -54,9 +54,6 @@ void InstanceBuilder::read_polyakovskiy2014(std::ifstream& file)
     std::string tmp;
     std::vector<std::string> line;
     ItemId number_of_items = -1;
-    std::string edge_weight_type;
-    std::string edge_weight_format;
-    std::string node_coord_type = "TWOD_COORDS";
     while (getline(file, tmp)) {
         line = optimizationtools::split(tmp);
         if (line.size() == 0) {
@@ -100,7 +97,10 @@ void InstanceBuilder::read_polyakovskiy2014(std::ifstream& file)
         } else if (tmp.rfind("EOF", 0) == 0) {
             break;
         } else {
-            std::cerr << "\033[31m" << "ERROR, ENTRY \"" << line[0] << "\" not implemented." << "\033[0m" << std::endl;
+            throw std::invalid_argument(
+                    "ENTRY \""
+                    + line[0]
+                    + "\" not implemented.");
         }
     }
 }

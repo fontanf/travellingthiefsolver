@@ -84,6 +84,7 @@ public:
             const std::vector<std::vector<travellingthiefsolver::packingwhiletravelling::CityState>>& city_states,
             Parameters parameters):
         instance_(instance),
+        distances_(instance.distances()),
         city_states_(city_states),
         parameters_(parameters),
         closest_city_distances_(instance_.number_of_cities(), std::numeric_limits<Distance>::max())
@@ -104,7 +105,7 @@ public:
             for (CityId city_id_2 = city_id_1 + 1;
                     city_id_2 < instance_.number_of_cities();
                     ++city_id_2) {
-                Distance d = instance_.distance(city_id_1, city_id_2);
+                Distance d = distances_.distance(city_id_1, city_id_2);
                 if (closest_city_distances_[city_id_1] > d)
                     closest_city_distances_[city_id_1] = d;
                 if (closest_city_distances_[city_id_2] > d)
@@ -185,7 +186,7 @@ public:
         child->number_of_cities = father->number_of_cities + 1;
         child->number_of_items = father->number_of_items
             + city_states_[city_id_next][city_state_id_next].item_ids.size();
-        Distance d = instance_.distance(
+        Distance d = distances_.distance(
                 father->last_visited_city_id,
                 city_id_next);
         child->distance = father->distance + d;
@@ -204,7 +205,7 @@ public:
             - city_states_[city_id_next].back().total_profit;
         child->remaining_weight = father->remaining_weight
             - city_states_[city_id_next].back().total_weight;
-        Time d_end = instance_.distance(
+        Time d_end = distances_.distance(
                 city_id_next,
                 0);
         child->distance_full = child->distance + d_end;
@@ -389,6 +390,9 @@ private:
     /** Instance. */
     const Instance& instance_;
 
+    /** Distances. */
+    const travelingsalesmansolver::Distances& distances_;
+
     /** City states. */
     const std::vector<std::vector<travellingthiefsolver::packingwhiletravelling::CityState>>& city_states_;
 
@@ -404,7 +408,7 @@ private:
 
 };
 
-Output travellingthiefsolver::travellingthief::tree_search(
+const Output travellingthiefsolver::travellingthief::tree_search(
         const Instance& instance,
         optimizationtools::Info info)
 {

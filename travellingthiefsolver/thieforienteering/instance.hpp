@@ -29,6 +29,8 @@
 
 #include "travellingthiefsolver/packingwhiletravelling/utils.hpp"
 
+#include "travelingsalesmansolver/distances.hpp"
+
 #include "optimizationtools/utils/info.hpp"
 #include "optimizationtools/utils/utils.hpp"
 
@@ -70,15 +72,6 @@ struct Item
  */
 struct City
 {
-    /** x-coordinate. */
-    double x;
-
-    /** y-coordinate. */
-    double y;
-
-    /** z-coordinate. */
-    double z;
-
     /** Items available at the city. */
     std::vector<ItemId> item_ids;
 };
@@ -95,52 +88,6 @@ public:
      * Constructors and destructor
      */
 
-    /** Create an instance from a file. */
-    Instance(
-            std::string instance_path,
-            std::string format);
-
-    /** Create an instance manually. */
-    Instance(CityId number_of_cities = 0);
-
-    /** Set the coordinates of a city. */
-    void set_xy(
-            CityId city_id,
-            double x,
-            double y,
-            double z = -1);
-
-    /** Set the distance between two cities. */
-    inline void set_distance(
-            CityId city_id_1,
-            CityId city_id_2,
-            Distance distance)
-    {
-        if (city_id_1 > city_id_2) {
-            distances_[city_id_1][city_id_2] = distance;
-        } else {
-            distances_[city_id_2][city_id_1] = distance;
-        }
-    }
-
-    /** Set the minimum speed. */
-    void set_minimum_speed(double minimum_speed) { speed_min_ = minimum_speed; }
-
-    /** Set the maximum speed. */
-    void set_maximum_speed(double maximum_speed) { speed_max_ = maximum_speed; }
-
-    /** Set the time limit. */
-    void set_time_limit(double time_limit) { time_limit_ = time_limit; }
-
-    /** Set the capacity of the knapsack. */
-    void set_capacity(Weight capacity) { capacity_ = capacity; }
-
-    /** Add an item. */
-    void add_item(
-            CityId city_id,
-            Weight weight,
-            Profit profit);
-
     /*
      * Getters
      */
@@ -150,19 +97,6 @@ public:
 
     /** Get a city. */
     inline const City& city(CityId city_id) const { return cities_[city_id]; }
-
-    /** Get the x-coordinate of a city. */
-    inline double x(CityId city_id) const { return cities_[city_id].x; }
-
-    /** Get the y-coordinate of a city. */
-    inline double y(CityId city_id) const { return cities_[city_id].y; }
-
-    /** Get the distance between two cities. */
-    inline Distance distance(
-            CityId city_id_1,
-            CityId city_id_2) const;
-
-    inline const std::vector<std::vector<Distance>>& distances() const { return distances_; }
 
     /** Get the speed for a given weight. */
     inline double speed(
@@ -192,11 +126,11 @@ public:
     /** Get the time limit. */
     inline double time_limit() const { return time_limit_; }
 
-    /** Get the edge weight type. */
-    inline std::string edge_weight_type() const { return edge_weight_type_; }
+    /** Get distances. */
+    const travelingsalesmansolver::Distances& distances() const { return *distances_; }
 
-    /** Get the node coord type. */
-    inline std::string node_coord_type() const { return node_coord_type_; }
+    /** Get the shared pointer to the distances class. */
+    const std::shared_ptr<const travelingsalesmansolver::Distances>& distances_ptr() const { return distances_; }
 
     /*
      * Export
@@ -213,8 +147,8 @@ private:
      * Private methods
      */
 
-    /** Read an instance from a file in 'polyakovskiy2014' format. */
-    void read_polyakovskiy2014(std::ifstream& file);
+    /** Create an instance manually. */
+    Instance() { }
 
     /*
      * Private attributes
@@ -224,7 +158,7 @@ private:
     std::vector<City> cities_;
 
     /** Distances. */
-    std::vector<std::vector<Distance>> distances_;
+    std::shared_ptr<const travelingsalesmansolver::Distances> distances_;
 
     /** Minimum speed. */
     double speed_min_ = -1;
@@ -247,19 +181,7 @@ private:
     /** Weight sum. */
     Weight weight_sum_ = 0;
 
-    /**
-     * Edge weight type.
-     *
-     * See http://comopt.ifi.uni-heidelberg.de/software/TSPLIB95/tsp95.pdf
-     */
-    std::string edge_weight_type_ = "EXPLICIT";
-
-    /**
-     * Node coord type.
-     *
-     * See http://comopt.ifi.uni-heidelberg.de/software/TSPLIB95/tsp95.pdf
-     */
-    std::string node_coord_type_ = "TWOD_COORDS";
+    friend class InstanceBuilder;
 
 };
 
@@ -270,17 +192,6 @@ void init_display(
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// Inlined methods ////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-
-inline Distance Instance::distance(
-        CityId city_id_1,
-        CityId city_id_2) const
-{
-    if (city_id_1 > city_id_2) {
-        return distances_[city_id_1][city_id_2];
-    } else {
-        return distances_[city_id_2][city_id_1];
-    }
-}
 
 inline double Instance::speed(
         Weight weight) const
@@ -295,7 +206,7 @@ inline Time Instance::duration(
         CityId city_id_2,
         Weight weight) const
 {
-    return (double)distance(city_id_1, city_id_2) / speed(weight);
+    return (double)distances().distance(city_id_1, city_id_2) / speed(weight);
 }
 
 }

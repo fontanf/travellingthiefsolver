@@ -1,3 +1,4 @@
+#include "travellingthiefsolver/thieforienteering/instance_builder.hpp"
 #include "travellingthiefsolver/thieforienteering/solution.hpp"
 
 #include <boost/program_options.hpp>
@@ -35,7 +36,9 @@ int main(int argc, char *argv[])
     }
 
     // Read instance.
-    Instance instance(instance_path, format);
+    InstanceBuilder instance_builder;
+    instance_builder.read(instance_path, format);
+    const Instance instance = instance_builder.build();
 
     // Read solution.
     Solution solution(instance, certificate_path);

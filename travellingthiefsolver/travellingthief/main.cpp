@@ -68,8 +68,9 @@ int main(int argc, char *argv[])
         .set_sigint_handler()
         ;
 
-    InstanceBuilder instance_builder(instance_path, format);
-    Instance instance = instance_builder.build();
+    InstanceBuilder instance_builder;
+    instance_builder.read(instance_path, format);
+    const Instance instance = instance_builder.build();
 
     std::mt19937_64 generator(seed);
     Solution solution(instance, initial_solution_path);

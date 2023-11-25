@@ -43,8 +43,8 @@ void Solution::add_city(CityId city_id)
     CityId city_id_prev = city_ids_.back();
     city_ids_.push_back(city_id);
     cities_is_visited_[city_id] = true;
-    distance_cur_ += instance().distance(city_id_prev, city_id);
-    distance_ = distance_cur_ + instance().distance(city_id, 0);
+    distance_cur_ += instance().distances().distance(city_id_prev, city_id);
+    distance_ = distance_cur_ + instance().distances().distance(city_id, 0);
     travel_time_cur_ += instance().duration(city_id_prev, city_id, item_weight_);
     item_weight_ += instance().city(city_id).weight;
     travel_time_ = travel_time_cur_ + instance().duration(city_id, 0, item_weight_);

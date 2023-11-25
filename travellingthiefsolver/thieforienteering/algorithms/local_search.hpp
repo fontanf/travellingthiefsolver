@@ -16,7 +16,7 @@ namespace thieforienteering
  * - "Investigation of the traveling thief problem" (Wuijts et Thierens, 2019)
  *   https://doi.org/10.1145/3321707.3321766
  */
-Output local_search(
+const Output local_search(
         const Instance& instance,
         optimizationtools::Info info = optimizationtools::Info());
 

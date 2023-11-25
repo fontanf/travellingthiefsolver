@@ -1,8 +1,8 @@
-#include "travellingthiefsolver/travellingthief/instance_builder.hpp"
+#include "travellingthiefsolver/travellingwhilepacking/instance_builder.hpp"
 
 #include "travelingsalesmansolver/distances_builder.hpp"
 
-using namespace travellingthiefsolver::travellingthief;
+using namespace travellingthiefsolver::travellingwhilepacking;
 
 void InstanceBuilder::add_cities(CityId number_of_cities)
 {
@@ -12,22 +12,11 @@ void InstanceBuilder::add_cities(CityId number_of_cities)
             City());
 }
 
-void InstanceBuilder::add_item(
+void InstanceBuilder::set_weight(
         CityId city_id,
-        Weight weight,
-        Profit profit)
+        Weight weight)
 {
-    ItemId item_id = instance_.items_.size();
-    instance_.cities_[city_id].item_ids.push_back(item_id);
-
-    Item item;
-    item.city_id = city_id;
-    item.profit = profit;
-    item.weight = weight;
-    instance_.items_.push_back(item);
-
-    instance_.profit_sum_ += profit;
-    instance_.weight_sum_ += weight;
+    instance_.cities_[city_id].weight = weight;
 }
 
 void InstanceBuilder::read(
@@ -56,7 +45,6 @@ void InstanceBuilder::read_polyakovskiy2014(std::ifstream& file)
 
     std::string tmp;
     std::vector<std::string> line;
-    ItemId number_of_items = -1;
     while (getline(file, tmp)) {
         line = optimizationtools::split(tmp);
         if (line.size() == 0) {
@@ -71,8 +59,6 @@ void InstanceBuilder::read_polyakovskiy2014(std::ifstream& file)
             CityId number_of_cities = std::stol(line.back());
             add_cities(number_of_cities);
             distances_builder.add_vertices(number_of_cities);
-        } else if (tmp.rfind("NUMBER OF ITEMS", 0) == 0) {
-            number_of_items = std::stol(line.back());
         } else if (tmp.rfind("CAPACITY OF KNAPSACK", 0) == 0) {
             set_capacity(std::stol(line.back()));
         } else if (tmp.rfind("MIN SPEED", 0) == 0) {
@@ -81,14 +67,14 @@ void InstanceBuilder::read_polyakovskiy2014(std::ifstream& file)
             set_maximum_speed(std::stod(line.back()));
         } else if (tmp.rfind("RENTING RATIO", 0) == 0) {
             set_renting_ratio(std::stod(line.back()));
-        } else if (tmp.rfind("ITEMS SECTION", 0) == 0) {
-            ItemId tmp = -1;
-            Profit profit = -1;
-            Weight weight = -1;
+        } else if (tmp.rfind("WEIGHTS SECTION", 0) == 0) {
             CityId city = -1;
-            for (ItemId item_id = 0; item_id < number_of_items; ++item_id) {
-                file >> tmp >> profit >> weight >> city;
-                add_item(city - 1, weight, profit);
+            Weight weight = -1;
+            for (CityId city_id = 0;
+                    city_id < instance_.number_of_cities();
+                    ++city_id) {
+                file >> tmp >> weight;
+                set_weight(city, weight);
             }
         } else if (tmp.rfind("EOF", 0) == 0) {
             break;
@@ -110,5 +96,12 @@ void InstanceBuilder::read_polyakovskiy2014(std::ifstream& file)
 
 Instance InstanceBuilder::build()
 {
+    // Compute total weight.
+    for (CityId city_id = 0;
+            city_id < instance_.number_of_cities();
+            ++city_id) {
+        instance_.total_weight_ += instance_.city(city_id).weight;
+    }
+
     return std::move(instance_);
 }

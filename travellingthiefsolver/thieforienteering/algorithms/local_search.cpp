@@ -143,7 +143,7 @@ private:
 
 };
 
-Output travellingthiefsolver::thieforienteering::local_search(
+const Output travellingthiefsolver::thieforienteering::local_search(
         const Instance& instance,
         optimizationtools::Info info)
 {
@@ -156,6 +156,7 @@ Output travellingthiefsolver::thieforienteering::local_search(
 
     Output output(instance, info);
 
+    instance.distances().compute_distances();
     auto city_states = packingwhiletravelling::compute_city_states<Instance>(instance);
 
     //for (CityId city_id = 0; city_id < instance.number_of_cities(); ++city_id) {

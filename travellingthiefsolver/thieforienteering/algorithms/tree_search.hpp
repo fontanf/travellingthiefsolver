@@ -15,7 +15,7 @@ namespace thieforienteering
  * - "Exact Approaches for the Travelling Thief Problem" (Wu et al., 2017)
  *   https://doi.org/10.1007/978-3-319-68759-9_10
  */
-Output tree_search(
+const Output tree_search(
         const Instance& instance,
         optimizationtools::Info info = optimizationtools::Info());
 
