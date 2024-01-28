@@ -17,7 +17,7 @@ namespace thieforienteering
  */
 const Output tree_search(
         const Instance& instance,
-        optimizationtools::Info info = optimizationtools::Info());
+        const Parameters& parameters = {});
 
 }
 }

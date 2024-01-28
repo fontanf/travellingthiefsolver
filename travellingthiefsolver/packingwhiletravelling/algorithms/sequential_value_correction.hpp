@@ -1,24 +1,19 @@
 #pragma once
 
-#include "travellingthiefsolver/packingwhiletravelling/solution.hpp"
+#include "travellingthiefsolver/packingwhiletravelling/algorithm.hpp"
 
 namespace travellingthiefsolver
 {
 namespace packingwhiletravelling
 {
 
-struct SequentialValueCorrectionOptionalParameters
+struct SequentialValueCorrectionParameters: Parameters
 {
-    /** Reduction parameters. */
-    ReductionParameters reduction_parameters;
-
-    /** Info structure. */
-    optimizationtools::Info info = optimizationtools::Info();
 };
 
 Output sequential_value_correction(
         const Instance& instance,
-        SequentialValueCorrectionOptionalParameters parameters = {});
+        const SequentialValueCorrectionParameters& parameters = {});
 
 }
 }

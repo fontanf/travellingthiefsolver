@@ -2,7 +2,11 @@
 
 #include "travellingthiefsolver/travellingthief/instance.hpp"
 
+#include "optimizationtools//utils/utils.hpp"
+#include "optimizationtools//utils/output.hpp"
+
 #include <string>
+#include <iomanip>
 
 namespace travellingthiefsolver
 {
@@ -36,7 +40,7 @@ class Solution
 public:
 
     /*
-     * Constructors and destructor.
+     * Constructors and destructor
      */
 
     /** Create an empty solution. */
@@ -45,7 +49,7 @@ public:
     /** Create a solution from a certificate file. */
     Solution(
             const Instance& instance,
-            std::string certificate_path);
+            const std::string& certificate_path);
 
     /*
      * Getters
@@ -85,7 +89,7 @@ public:
     inline Profit renting_cost() const { return instance().renting_ratio() * travel_time_; }
 
     /** Get the objective value of the solution. */
-    inline Profit objective() const { return item_profit() - renting_cost(); }
+    inline Profit objective_value() const { return item_profit() - renting_cost(); }
 
     /**
      * Return 'true' iff the solution is feasible.
@@ -114,14 +118,19 @@ public:
      */
 
     /** Print the instance. */
-    std::ostream& print(
+    std::ostream& format(
             std::ostream& os,
-            int verbose = 1) const;
+            int verbosity_level = 1) const;
+
+    /** Export solution characteristics to a JSON structure. */
+    nlohmann::json to_json() const;
 
     /** Write the solution to a file. */
-    void write(std::string certificate_path) const;
+    void write(
+            const std::string& certificate_path) const;
 
-    void write_csv(std::string output_path) const;
+    void write_csv(
+            const std::string& output_path) const;
 
 private:
 
@@ -190,15 +199,22 @@ private:
 //////////////////////////////////// Output ////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+inline optimizationtools::ObjectiveDirection objective_direction()
+{
+    return optimizationtools::ObjectiveDirection::Maximize;
+}
+
 /**
- * Output structure for a 'travellingthief' problem.
+ * Output structure for a set covering problem.
  */
-struct Output
+struct Output: optimizationtools::Output
 {
     /** Constructor. */
     Output(
-            const Instance& instance,
-            optimizationtools::Info& info);
+            const Instance& instance):
+        solution(instance),
+        bound(instance.total_item_profit()) { }
+
 
     /** Solution. */
     Solution solution;
@@ -207,33 +223,83 @@ struct Output
     Profit bound = std::numeric_limits<Profit>::infinity();
 
     /** Elapsed time. */
-    double time = -1;
+    double time = 0.0;
 
-    /** Print current state. */
-    void print(
-            optimizationtools::Info& info,
-            const std::stringstream& s) const;
 
-    /** Update the solution. */
-    void update_solution(
-            const Solution& solution_new,
-            const std::stringstream& s,
-            optimizationtools::Info& info);
+    std::string solution_value() const
+    {
+        return optimizationtools::solution_value(
+            objective_direction(),
+            solution.feasible(),
+            solution.objective_value());
+    }
 
-    /** Update the bound. */
-    void update_bound(
-            Profit bound_new,
-            const std::stringstream& s,
-            optimizationtools::Info& info);
+    double absolute_optimality_gap() const
+    {
+        return optimizationtools::absolute_optimality_gap(
+                objective_direction(),
+                solution.feasible(),
+                solution.objective_value(),
+                bound);
+    }
 
-    /** Print the algorithm statistics. */
-    virtual void print_statistics(
-            optimizationtools::Info& info) const { (void)info; }
+    double relative_optimality_gap() const
+    {
+       return optimizationtools::relative_optimality_gap(
+            objective_direction(),
+            solution.feasible(),
+            solution.objective_value(),
+            bound);
+    }
 
-    /** Method to call at the end of the algorithm. */
-    Output& algorithm_end(optimizationtools::Info& info);
+    virtual nlohmann::json to_json() const
+    {
+        return nlohmann::json {
+            {"Solution", solution.to_json()},
+            {"Value", solution_value()},
+            {"Bound", bound},
+            {"AbsoluteOptimalityGap", absolute_optimality_gap()},
+            {"RelativeOptimalityGap", relative_optimality_gap()},
+            {"Time", time}
+        };
+    }
+
+    virtual int format_width() const { return 30; }
+
+    virtual void format(std::ostream& os) const
+    {
+        int width = format_width();
+        os
+            << std::setw(width) << std::left << "Value: " << solution_value() << std::endl
+            << std::setw(width) << std::left << "Bound: " << bound << std::endl
+            << std::setw(width) << std::left << "Absolute optimality gap: " << absolute_optimality_gap() << std::endl
+            << std::setw(width) << std::left << "Relative optimality gap (%): " << relative_optimality_gap() * 100 << std::endl
+            << std::setw(width) << std::left << "Time (s): " << time << std::endl
+            ;
+    }
+};
+
+using NewSolutionCallback = std::function<void(const Output&, const std::string&)>;
+
+struct Parameters: optimizationtools::Parameters
+{
+    /** Callback function called when a new best solution is found. */
+    NewSolutionCallback new_solution_callback = [](const Output&, const std::string&) { };
+
+
+    virtual nlohmann::json to_json() const override
+    {
+        nlohmann::json json = optimizationtools::Parameters::to_json();
+        return json;
+    }
+
+    virtual int format_width() const override { return 23; }
+
+    virtual void format(std::ostream& os) const override
+    {
+        optimizationtools::Parameters::format(os);
+    }
 };
 
 }
 }
-

@@ -7,21 +7,16 @@ namespace travellingthiefsolver
 namespace travellingthief
 {
 
-struct LargeNeighborhoodSearchOptionalParameters
+struct LargeNeighborhoodSearchParameters: Parameters
 {
-    /** Info structure. */
-    optimizationtools::Info info = optimizationtools::Info();
 };
 
 struct LargeNeighborhoodSearchOutput: Output
 {
     LargeNeighborhoodSearchOutput(
-            const Instance& instance,
-            optimizationtools::Info& info):
-        Output(instance, info) { }
+            const Instance& instance):
+        Output(instance) { }
 
-    void print_statistics(
-            optimizationtools::Info& info) const override;
 
     Counter number_of_iterations = 0;
 };
@@ -32,8 +27,7 @@ struct LargeNeighborhoodSearchOutput: Output
 Output large_neighborhood_search(
         const Instance& instance,
         std::mt19937_64& generator,
-        LargeNeighborhoodSearchOptionalParameters parameters = {});
+        const LargeNeighborhoodSearchParameters& parameters = {});
 
 }
 }
-

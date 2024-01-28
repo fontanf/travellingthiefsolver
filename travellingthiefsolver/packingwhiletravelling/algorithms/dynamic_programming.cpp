@@ -1,36 +1,22 @@
 #include "travellingthiefsolver/packingwhiletravelling/algorithms/dynamic_programming.hpp"
 
+#include "travellingthiefsolver/packingwhiletravelling/algorithm_formatter.hpp"
 #include "travellingthiefsolver/packingwhiletravelling/solution_builder.hpp"
 
 using namespace travellingthiefsolver::packingwhiletravelling;
 
 Output travellingthiefsolver::packingwhiletravelling::dynamic_programming(
-        const Instance& original_instance,
-        DynamicProgrammingOptionalParameters parameters)
+        const Instance& instance,
+        const DynamicProgrammingParameters& parameters)
 {
-    init_display(original_instance, parameters.info);
-    parameters.info.os()
-        << "Algorithm" << std::endl
-        << "---------" << std::endl
-        << "Dynamic Programming" << std::endl
-        << std::endl;
+    Output output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Dynamic Programming");
+    algorithm_formatter.print_header();
 
     // Reduction.
-    std::unique_ptr<Instance> reduced_instance = nullptr;
-    if (parameters.reduction_parameters.reduce) {
-        reduced_instance = std::unique_ptr<Instance>(
-            new Instance(
-                original_instance.reduce(
-                    parameters.reduction_parameters)));
-        parameters.info.os()
-            << "Reduced instance" << std::endl
-            << "----------------" << std::endl;
-        reduced_instance->print(parameters.info.os(), parameters.info.verbosity_level());
-        parameters.info.os() << std::endl;
-    }
-    const Instance& instance = (reduced_instance == nullptr)? original_instance: *reduced_instance;
-
-    Output output(original_instance, parameters.info);
+    if (parameters.reduction_parameters.reduce)
+        return solve_reduced_instance(dynamic_programming, instance, parameters, algorithm_formatter, output);
 
     ItemId number_of_rows = 1 + instance.number_of_cities() + instance.number_of_items();
     std::vector<std::vector<double>> beta(
@@ -146,7 +132,8 @@ Output travellingthiefsolver::packingwhiletravelling::dynamic_programming(
     }
 
     // backtracking
-    SolutionBuilder solution_builder(instance);
+    SolutionBuilder solution_builder;
+    solution_builder.set_instance(instance);
     Weight current_weight = optimal_weight;
     for (ItemId row = number_of_rows - 1; row > 0; --row) {
         if (rows[row].first) {
@@ -169,9 +156,8 @@ Output travellingthiefsolver::packingwhiletravelling::dynamic_programming(
     Solution solution = solution_builder.build();
 
     // Update output.
-    std::stringstream ss;
-    ss << "final solution";
-    output.update_solution(solution, ss, parameters.info);
+    algorithm_formatter.update_solution(solution, "final solution");
 
-    return output.algorithm_end(parameters.info);
+    algorithm_formatter.end();
+    return output;
 }

@@ -1,10 +1,12 @@
 #include "travellingthiefsolver/thieforienteering/algorithms/local_search.hpp"
 
+#include "travellingthiefsolver/thieforienteering/algorithm_formatter.hpp"
+
 #include "travellingthiefsolver/packingwhiletravelling/utils.hpp"
 
 #include "localsearchsolver/sequencing.hpp"
 #include "localsearchsolver/best_first_local_search.hpp"
-#include "localsearchsolver/genetic_local_search.hpp"
+//#include "localsearchsolver/genetic_local_search.hpp"
 
 using namespace travellingthiefsolver::thieforienteering;
 
@@ -145,16 +147,12 @@ private:
 
 const Output travellingthiefsolver::thieforienteering::local_search(
         const Instance& instance,
-        optimizationtools::Info info)
+        const Parameters& parameters)
 {
-    init_display(instance, info);
-    info.os()
-        << "Algorithm" << std::endl
-        << "---------" << std::endl
-        << "Local search" << std::endl
-        << std::endl;
-
-    Output output(instance, info);
+    Output output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Local search");
+    algorithm_formatter.print_header();
 
     instance.distances().compute_distances();
     auto city_states = packingwhiletravelling::compute_city_states<Instance>(instance);
@@ -178,29 +176,28 @@ const Output travellingthiefsolver::thieforienteering::local_search(
         = sequencing_scheme.sequencing_parameters();
     LocalScheme local_scheme(sequencing_scheme, sequencing_parameters);
 
-    localsearchsolver::BestFirstLocalSearchOptionalParameters<LocalScheme> bfls_parameters;
-    bfls_parameters.info.set_verbosity_level(0);
-    bfls_parameters.info.set_time_limit(info.remaining_time());
+    localsearchsolver::BestFirstLocalSearchParameters<LocalScheme> bfls_parameters;
+    bfls_parameters.verbosity_level = 0;
+    bfls_parameters.timer = parameters.timer;
     //bfls_parameters.maximum_number_of_nodes = 100;
     bfls_parameters.new_solution_callback
-        = [&instance, &city_states, &info, &output](
-                const LocalScheme::Solution& solution)
+        = [&instance, &city_states, &algorithm_formatter](
+                const localsearchsolver::Output<LocalScheme>& ls_output)
         {
-            Solution sol(instance);
-            for (auto se: solution.sequences[0].elements) {
+            Solution solution(instance);
+            for (auto se: ls_output.solution_pool.best().sequences[0].elements) {
                 CityId city_id = se.element_id + 1;
-                sol.add_city(city_id);
+                solution.add_city(city_id);
                 for (ItemId item_id: city_states[city_id][se.mode].item_ids) {
-                    sol.add_item(item_id);
+                    solution.add_item(item_id);
                 }
             }
-            std::stringstream ss;
-            output.update_solution(sol, ss, info);
+            algorithm_formatter.update_solution(solution, "");
         };
     best_first_local_search(local_scheme, bfls_parameters);
 
     /*
-    localsearchsolver::GeneticLocalSearchOptionalParameters<LocalScheme> gls_parameters;
+    localsearchsolver::GeneticLocalSearchParameters<LocalScheme> gls_parameters;
     //gls_parameters.info.set_verbosity_level(1);
     gls_parameters.info.set_time_limit(info.remaining_time());
     //gls_parameters.maximum_number_of_iterations = 100;
@@ -218,10 +215,11 @@ const Output travellingthiefsolver::thieforienteering::local_search(
                 }
             }
             std::stringstream ss;
-            output.update_solution(sol, ss, info);
+            algorithm_formatter.update_solution(sol, ss, info);
         };
     genetic_local_search(local_scheme, gls_parameters);
     */
 
-    return output.algorithm_end(info);
+    algorithm_formatter.end();
+    return output;
 }

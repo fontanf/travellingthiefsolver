@@ -14,7 +14,7 @@ Solution::Solution(const Instance& instance):
 
 Solution::Solution(
         const Instance& instance,
-        std::string certificate_path):
+        const std::string& certificate_path):
     Solution(instance)
 {
     if (certificate_path.empty())
@@ -105,25 +105,37 @@ void Solution::add_item(ItemId item_id)
     cities_[city_id].weight += item.weight;
 }
 
-std::ostream& Solution::print(
-        std::ostream& os,
-        int verbose) const
+nlohmann::json Solution::to_json() const
 {
-    if (verbose >= 1) {
+    return nlohmann::json {
+        {"NumberOfCities", number_of_cities()},
+        {"Distance", distance()},
+        {"TravelTime", travel_time()},
+        {"NumberOfItems", number_of_items()},
+        {"ItemWeight", item_weight()},
+        {"ItemProfit", item_profit()},
+    };
+}
+
+std::ostream& Solution::format(
+        std::ostream& os,
+        int verbosity_level) const
+{
+    if (verbosity_level >= 1) {
         os
-            << "Number of vertices:  " << optimizationtools::Ratio<CityId>(number_of_cities(), instance().number_of_cities()) << std::endl
-            << "Distance:            " << distance() << std::endl
-            << "Travel time:         " << travel_time() << std::endl
-            << "Renting cost:        " << renting_cost() << std::endl
-            << "Number of items:     " << optimizationtools::Ratio<ItemId>(number_of_items(), instance().number_of_items()) << std::endl
-            << "Item weight:         " << optimizationtools::Ratio<Weight>(item_weight(), instance().capacity()) << std::endl
-            << "Item profit:         " << item_profit() << std::endl
-            << "Feasible:            " << feasible() << std::endl
-            << "Objective:           " << objective() << std::endl
+            << "Number of cities:  " << optimizationtools::Ratio<CityId>(number_of_cities(), instance().number_of_cities()) << std::endl
+            << "Distance:          " << distance() << std::endl
+            << "Travel time:       " << travel_time() << std::endl
+            << "Renting cost:      " << renting_cost() << std::endl
+            << "Number of items:   " << optimizationtools::Ratio<ItemId>(number_of_items(), instance().number_of_items()) << std::endl
+            << "Item weight:       " << optimizationtools::Ratio<Weight>(item_weight(), instance().capacity()) << std::endl
+            << "Item profit:       " << item_profit() << std::endl
+            << "Feasible:          " << feasible() << std::endl
+            << "Objective value:   " << objective_value() << std::endl
             ;
     }
 
-    if (verbose >= 2) {
+    if (verbosity_level >= 2) {
         os << std::endl
             << std::setw(12) << "City"
             << std::setw(12) << "# items"
@@ -149,7 +161,7 @@ std::ostream& Solution::print(
         }
     }
 
-    if (verbose >= 3) {
+    if (verbosity_level >= 3) {
         os << std::endl
             << std::setw(12) << "Item"
             << std::setw(12) << "City"
@@ -171,7 +183,8 @@ std::ostream& Solution::print(
     return os;
 }
 
-void Solution::write(std::string certificate_path) const
+void Solution::write(
+        const std::string& certificate_path) const
 {
     if (certificate_path.empty())
         return;
@@ -195,7 +208,8 @@ void Solution::write(std::string certificate_path) const
     file << "]" << std::endl;
 }
 
-void Solution::write_csv(std::string output_path) const
+void Solution::write_csv(
+        const std::string& output_path) const
 {
     if (output_path.empty())
         return;
@@ -228,157 +242,4 @@ void Solution::write_csv(std::string output_path) const
             << speed << std::endl;
         city_id_prev = city_id;
     }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////// Output ////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-Output::Output(
-        const Instance& instance,
-        optimizationtools::Info& info):
-    solution(instance)
-{
-    info.os()
-        << std::setw(12) << "T (s)"
-        << std::setw(12) << "Distance"
-        << std::setw(12) << "Cost"
-        << std::setw(12) << "# items"
-        << std::setw(12) << "Profit"
-        << std::setw(12) << "Objective"
-        << std::setw(24) << "Comment"
-        << std::endl
-        << std::setw(12) << "-----"
-        << std::setw(12) << "--------"
-        << std::setw(12) << "----"
-        << std::setw(12) << "-------"
-        << std::setw(12) << "------"
-        << std::setw(12) << "---------"
-        << std::setw(24) << "-------"
-        << std::endl;
-    print(info, std::stringstream(""));
-}
-
-void Output::print(
-        optimizationtools::Info& info,
-        const std::stringstream& s) const
-{
-    double t = info.elapsed_time();
-    std::streamsize precision = std::cout.precision();
-
-    info.os()
-        << std::setw(12) << std::fixed << std::setprecision(3) << t << std::defaultfloat << std::setprecision(precision)
-        << std::setw(12) << solution.distance()
-        << std::setw(12) << solution.renting_cost()
-        << std::setw(12) << solution.number_of_items()
-        << std::setw(12) << solution.item_profit()
-        << std::setw(12) << solution.objective()
-        << std::setw(24) << s.str()
-        << std::endl;
-
-    if (!info.output->only_write_at_the_end)
-        info.write_json_output();
-}
-
-void Output::update_solution(
-        const Solution& solution_new,
-        const std::stringstream& s,
-        optimizationtools::Info& info)
-{
-    info.lock();
-
-    if (solution_new.feasible()
-            && (!solution.feasible()
-                || solution.objective() < solution_new.objective())) {
-        // Update solution
-        solution = solution_new;
-        print(info, s);
-
-        std::string solution_value = optimizationtools::solution_value(
-                optimizationtools::ObjectiveDirection::Maximize,
-                solution.feasible(),
-                solution.objective());
-        double t = info.elapsed_time();
-
-        info.output->number_of_solutions++;
-        std::string sol_str = "Solution" + std::to_string(info.output->number_of_solutions);
-        info.add_to_json(sol_str, "Value", solution_value);
-        info.add_to_json(sol_str, "Time", t);
-        info.add_to_json(sol_str, "String", s.str());
-        if (!info.output->only_write_at_the_end) {
-            info.write_json_output();
-            solution.write(info.output->certificate_path);
-        }
-    }
-
-    info.unlock();
-}
-
-void Output::update_bound(
-        Profit bound_new,
-        const std::stringstream& s,
-        optimizationtools::Info& info)
-{
-    info.lock();
-
-    if (bound > bound_new) {
-        // Update solution
-        bound = bound_new;
-        print(info, s);
-
-        double t = info.elapsed_time();
-
-        info.output->number_of_bounds++;
-        std::string sol_str = "Bound" + std::to_string(info.output->number_of_solutions);
-        info.add_to_json(sol_str, "Value", bound_new);
-        info.add_to_json(sol_str, "Time", t);
-        info.add_to_json(sol_str, "String", s.str());
-    }
-
-    info.unlock();
-}
-
-Output& Output::algorithm_end(optimizationtools::Info& info)
-{
-    std::string solution_value = optimizationtools::solution_value(
-            optimizationtools::ObjectiveDirection::Maximize,
-            solution.feasible(),
-            solution.objective());
-    double absolute_optimality_gap = optimizationtools::absolute_optimality_gap(
-            optimizationtools::ObjectiveDirection::Maximize,
-            solution.feasible(),
-            solution.objective(),
-            bound);
-    double relative_optimality_gap = optimizationtools::relative_optimality_gap(
-            optimizationtools::ObjectiveDirection::Maximize,
-            solution.feasible(),
-            solution.objective(),
-            bound);
-    time = info.elapsed_time();
-
-    info.add_to_json("Solution", "Value", solution_value);
-    info.add_to_json("Solution", "Time", time);
-    if (bound != std::numeric_limits<Profit>::infinity()) {
-        info.add_to_json("Bound", "Value", bound);
-        info.add_to_json("Bound", "Time", time);
-    }
-    info.os()
-        << std::endl
-        << "Final statistics" << std::endl
-        << "----------------" << std::endl
-        << "Value:                        " << solution_value << std::endl
-        << "Bound:                        " << bound << std::endl
-        << "Absolute optimality gap:      " << absolute_optimality_gap << std::endl
-        << "Relative optimality gap (%):  " << relative_optimality_gap * 100 << std::endl
-        << "Time (s):                     " << time << std::endl
-        ;
-    print_statistics(info);
-    info.os() << std::endl
-        << "Solution" << std::endl
-        << "--------" << std::endl ;
-    solution.print(info.os(), info.verbosity_level());
-
-    info.write_json_output();
-    solution.write(info.output->certificate_path);
-    return *this;
 }

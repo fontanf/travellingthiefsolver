@@ -1,9 +1,9 @@
 #pragma once
 
-#include "optimizationtools/utils/info.hpp"
-#include "optimizationtools/utils/utils.hpp"
-
-#include <random>
+#include <cstdint>
+#include <vector>
+#include <string>
+#include <iostream>
 
 namespace travellingthiefsolver
 {
@@ -67,42 +67,6 @@ struct City
     Weight weight_from_start;
 };
 
-class Instance;
-
-struct UnreductionInfo
-{
-    /** Pointer to the original instance. */
-    const Instance* original_instance = nullptr;
-
-    /** For each item, unreduction operations. */
-    std::vector<ItemId> unreduction_operations;
-
-    /** Mandatory items (from the original instance). */
-    std::vector<ItemId> mandatory_items;
-
-    /**
-     * Profit to add to a solution of the reduced instance to get the profit of
-     * the corresponding solution of the original instance.
-     */
-    Weight extra_profit;
-};
-
-/**
- * Structure passed as parameters of the reduction algorithm and the other
- * algorithm to determine whether and how to reduce.
- */
-struct ReductionParameters
-{
-    /** Boolean indicating if the reduction should be performed. */
-    bool reduce = true;
-
-    /** Enable expensive reduction. */
-    bool enable_expensive_reduction = false;
-
-    /** Maximum number of rounds. */
-    Counter maximum_number_of_rounds = 4;
-};
-
 /**
  * Instance class for a 'packingwhiletravelling' problem.
  */
@@ -110,13 +74,6 @@ class Instance
 {
 
 public:
-
-    /*
-     * Constructors and destructor
-     */
-
-    /** Reduce. */
-    Instance reduce(ReductionParameters parameters) const;
 
     /*
      * Getters
@@ -162,32 +119,23 @@ public:
     inline Weight city_weight() const { return city_weight_; }
 
     /** Get the total weight of the cities and the items. */
-    inline Weight total_weight() const { return weight_sum_; }
+    inline Weight total_weight() const { return total_weight_; }
 
-    /*
-     * Reduction information
-     */
-
-    /** Get the original instance. */
-    inline const Instance* original_instance() const { return (is_reduced())? unreduction_info().original_instance: this; }
-
-    /** Return 'true' iff the instance is a reduced instance. */
-    inline bool is_reduced() const { return unreduction_info_.original_instance != nullptr; }
-
-    /** Get the unreduction info of the instance; */
-    inline const UnreductionInfo& unreduction_info() const { return unreduction_info_; }
+    /** Get the total profit of the items. */
+    inline Weight total_item_profit() const { return total_item_profit_; }
 
     /*
      * Export
      */
 
     /** Print the instance. */
-    std::ostream& print(
+    std::ostream& format(
             std::ostream& os,
-            int verbose = 1) const;
+            int verbosity_level = 1) const;
 
     /** Write the instance to a file. */
-    void write(std::string instance_path) const;
+    void write(
+            const std::string& instance_path) const;
 
 private:
 
@@ -242,21 +190,17 @@ private:
     Weight capacity_ = -1;
 
     /** Weight sum. */
-    Weight weight_sum_ = 0;
+    Weight total_weight_ = 0;
 
     /** Weight of the cities. */
     Weight city_weight_ = 0;
 
-    /** Reduction structure. */
-    UnreductionInfo unreduction_info_;
+    /** Total item profit. */
+    Profit total_item_profit_ = 0;
 
     friend class InstanceBuilder;
 
 };
-
-void init_display(
-        const Instance& instance,
-        optimizationtools::Info& info);
 
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// Inlined methods ////////////////////////////////
@@ -277,4 +221,3 @@ inline Time Instance::duration(
 
 }
 }
-

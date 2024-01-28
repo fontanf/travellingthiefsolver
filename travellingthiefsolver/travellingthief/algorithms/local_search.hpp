@@ -18,8 +18,7 @@ namespace travellingthief
  */
 const Output local_search(
         const Instance& instance,
-        optimizationtools::Info info = optimizationtools::Info());
+        const Parameters& parameters = {});
 
 }
 }
-

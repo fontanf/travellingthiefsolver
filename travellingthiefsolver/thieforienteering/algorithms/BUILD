@@ -3,7 +3,7 @@ cc_library(
         hdrs = ["tree_search.hpp"],
         srcs = ["tree_search.cpp"],
         deps = [
-                "//travellingthiefsolver/thieforienteering:thieforienteeringsolver",
+                "//travellingthiefsolver/thieforienteering:thieforienteering",
                 "@treesearchsolver//treesearchsolver:treesearchsolver",
         ],
         visibility = ["//visibility:public"],
@@ -14,21 +14,8 @@ cc_library(
         hdrs = ["local_search.hpp"],
         srcs = ["local_search.cpp"],
         deps = [
-                "//travellingthiefsolver/thieforienteering:thieforienteeringsolver",
-                "//travellingthiefsolver/packingwhiletravelling:packingwhiletravellingsolver",
+                "//travellingthiefsolver/thieforienteering:thieforienteering",
                 "@localsearchsolver//localsearchsolver:localsearchsolver",
-        ],
-        visibility = ["//visibility:public"],
-)
-
-cc_library(
-        name = "algorithms",
-        hdrs = ["algorithms.hpp"],
-        srcs = ["algorithms.cpp"],
-        deps = [
-                ":tree_search",
-                ":local_search",
-                "@boost//:program_options",
         ],
         visibility = ["//visibility:public"],
 )

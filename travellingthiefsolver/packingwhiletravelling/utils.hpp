@@ -1,6 +1,6 @@
 #pragma once
 
-#include "travellingthiefsolver/packingwhiletravelling/solution.hpp"
+#include "travellingthiefsolver/packingwhiletravelling/instance.hpp"
 
 namespace travellingthiefsolver
 {
@@ -79,7 +79,6 @@ std::vector<std::vector<travellingthiefsolver::packingwhiletravelling::CityState
                     }
                     ++it1;
                 } else {
-                    assert(it != l0.end());
                     if (l.empty() || it->total_profit > l.back().total_profit) {
                         if (!l.empty() && it->total_weight == l.back().total_weight) {
                             l.back() = *it;

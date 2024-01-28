@@ -1,39 +1,22 @@
 #include "travellingthiefsolver/packingwhiletravelling/algorithms/greedy.hpp"
 
+#include "travellingthiefsolver/packingwhiletravelling/algorithm_formatter.hpp"
 #include "travellingthiefsolver/packingwhiletravelling/solution_builder.hpp"
-
-#include <limits>
-#include <iostream>
 
 using namespace travellingthiefsolver::packingwhiletravelling;
 
 Output travellingthiefsolver::packingwhiletravelling::greedy(
-    const Instance &original_instance,
-    GreedyOptionalParameters parameters)
+    const Instance& instance,
+    const GreedyParameters& parameters)
 {
-    init_display(original_instance, parameters.info);
-    parameters.info.os()
-        << "Algorithm" << std::endl
-        << "---------" << std::endl
-        << "Greedy" << std::endl
-        << std::endl;
+    Output output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Greedy");
+    algorithm_formatter.print_header();
 
     // Reduction.
-    std::unique_ptr<Instance> reduced_instance = nullptr;
-    if (parameters.reduction_parameters.reduce) {
-        reduced_instance = std::unique_ptr<Instance>(
-                new Instance(
-                    original_instance.reduce(
-                        parameters.reduction_parameters)));
-        parameters.info.os()
-            << "Reduced instance" << std::endl
-            << "----------------" << std::endl;
-        reduced_instance->print(parameters.info.os(), parameters.info.verbosity_level());
-        parameters.info.os() << std::endl;
-    }
-    const Instance& instance = (reduced_instance == nullptr)? original_instance: *reduced_instance;
-
-    Output output(original_instance, parameters.info);
+    if (parameters.reduction_parameters.reduce)
+        return solve_reduced_instance(greedy, instance, parameters, algorithm_formatter, output);
 
     // Compute scores
     std::vector<double> scores(instance.number_of_items(), 0);
@@ -92,7 +75,8 @@ Output travellingthiefsolver::packingwhiletravelling::greedy(
     }
 
     // Add items while it is possible/profitable
-    SolutionBuilder solution_builder(instance);
+    SolutionBuilder solution_builder;
+    solution_builder.set_instance(instance);
     Weight weight = instance.city_weight();
     for (ItemId item_id: sorted_item_ids) {
         if (weight + instance.item(item_id).weight <= instance.capacity()) {
@@ -108,12 +92,10 @@ Output travellingthiefsolver::packingwhiletravelling::greedy(
     Solution solution = solution_builder.build();
 
     // Update output.
-    std::stringstream ss;
-    ss << "greedy solution";
-    output.update_solution(
+    algorithm_formatter.update_solution(
             solution,
-            ss,
-            parameters.info);
+            "greedy solution");
 
-    return output.algorithm_end(parameters.info);
+    algorithm_formatter.end();
+    return output;
 }

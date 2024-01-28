@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
         << "Solution" << std::endl
         << "--------" << std::endl
         ;
-    solution.print(std::cout, 2);
+    solution.format(std::cout, 2);
 
     return 0;
 }

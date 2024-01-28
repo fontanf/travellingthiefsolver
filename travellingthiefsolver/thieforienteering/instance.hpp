@@ -31,10 +31,7 @@
 
 #include "travelingsalesmansolver/distances.hpp"
 
-#include "optimizationtools/utils/info.hpp"
-#include "optimizationtools/utils/utils.hpp"
-
-#include <random>
+#include <memory>
 
 namespace travellingthiefsolver
 {
@@ -137,9 +134,9 @@ public:
      */
 
     /** Print the instance. */
-    std::ostream& print(
+    std::ostream& format(
             std::ostream& os,
-            int verbose = 1) const;
+            int verbosity_level = 1) const;
 
 private:
 
@@ -185,10 +182,6 @@ private:
 
 };
 
-void init_display(
-        const Instance& instance,
-        optimizationtools::Info& info);
-
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// Inlined methods ////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -211,4 +204,3 @@ inline Time Instance::duration(
 
 }
 }
-

@@ -1,5 +1,6 @@
 #include "travellingthiefsolver/travellingthief/algorithms/iterative_tsp_pwt_ttp.hpp"
 
+#include "travellingthiefsolver/travellingthief/algorithm_formatter.hpp"
 #include "travellingthiefsolver/travellingthief/utils.hpp"
 #include "travellingthiefsolver/travellingthief/algorithms/efficient_local_search.hpp"
 #include "travellingthiefsolver/packingwhiletravelling/instance_builder.hpp"
@@ -10,38 +11,15 @@
 
 using namespace travellingthiefsolver::travellingthief;
 
-void IterativeTspPwtTtpOutput::print_statistics(
-        optimizationtools::Info& info) const
-{
-    if (info.verbosity_level() >= 1) {
-        info.os()
-            << "Number of SVC calls:          " << number_of_svc_calls << std::endl
-            << "Number of ELS calls:          " << number_of_els_calls << std::endl
-            << "TSP time:                     " << tsp_time << std::endl
-            << "PWT time:                     " << pwt_time << std::endl
-            << "TTP time:                     " << ttp_time << std::endl
-            ;
-    }
-    info.add_to_json("Algorithm", "NumberOfSvcCalls", number_of_svc_calls);
-    info.add_to_json("Algorithm", "NumberOfElsCalls", number_of_els_calls);
-    info.add_to_json("Algorithm", "TspTime", tsp_time);
-    info.add_to_json("Algorithm", "PwtTime", pwt_time);
-    info.add_to_json("Algorithm", "TtpTime", ttp_time);
-}
-
-IterativeTspPwtTtpOutput travellingthiefsolver::travellingthief::iterative_tsp_pwt_ttp(
+const IterativeTspPwtTtpOutput travellingthiefsolver::travellingthief::iterative_tsp_pwt_ttp(
         const Instance& instance,
         std::mt19937_64& generator,
-        IterativeTspPwtTtpOptionalParameters parameters)
+        const IterativeTspPwtTtpParameters& parameters)
 {
-    init_display(instance, parameters.info);
-    parameters.info.os()
-        << "Algorithm" << std::endl
-        << "---------" << std::endl
-        << "Iterative TSP PWT TTP" << std::endl
-        << std::endl;
-
-    IterativeTspPwtTtpOutput output(instance, parameters.info);
+    IterativeTspPwtTtpOutput output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Iterative TSP PWT TTP");
+    algorithm_formatter.print_header();
 
     // Create travelingsalesman instance.
     auto tsp_instance = create_tsp_instance(instance);
@@ -61,6 +39,7 @@ IterativeTspPwtTtpOutput travellingthiefsolver::travellingthief::iterative_tsp_p
                 instance,
                 tsp_instance,
                 generator,
+                parameters,
                 lkh_candidate_file_content);
 
         auto tsp_end = std::chrono::steady_clock::now();
@@ -77,8 +56,9 @@ IterativeTspPwtTtpOutput travellingthiefsolver::travellingthief::iterative_tsp_p
                     instance,
                     tsp_solution);
 
-            packingwhiletravelling::SequentialValueCorrectionOptionalParameters svc_parameters;
-            //pwt_parameters.parameters.info.set_verbosity_level(1);
+            packingwhiletravelling::SequentialValueCorrectionParameters svc_parameters;
+            svc_parameters.timer = parameters.timer;
+            svc_parameters.verbosity_level = 0;
             auto svc_output = packingwhiletravelling::sequential_value_correction(
                     pwt_instance,
                     svc_parameters);
@@ -94,7 +74,7 @@ IterativeTspPwtTtpOutput travellingthiefsolver::travellingthief::iterative_tsp_p
             // Update output.
             std::stringstream ss;
             ss << "initial svc " << i;
-            output.update_solution(svc_solution, ss, parameters.info);
+            algorithm_formatter.update_solution(svc_solution, ss.str());
 
             svc_solutions.push_back(svc_solution);
         }
@@ -113,7 +93,8 @@ IterativeTspPwtTtpOutput travellingthiefsolver::travellingthief::iterative_tsp_p
                 const Solution& solution_1,
                 const Solution& solution_2) -> bool
             {
-                return solution_1.objective() > solution_2.objective();
+                return solution_1.objective_value()
+                    > solution_2.objective_value();
             });
     while ((Counter)svc_solutions.size() > svc_solutions_size)
         svc_solutions.pop_back();
@@ -127,7 +108,9 @@ IterativeTspPwtTtpOutput travellingthiefsolver::travellingthief::iterative_tsp_p
                 instance,
                 svc_solution);
 
-        packingwhiletravelling::EfficientLocalSearchOptionalParameters els_parameters;
+        packingwhiletravelling::EfficientLocalSearchParameters els_parameters;
+        els_parameters.timer = parameters.timer;
+        els_parameters.verbosity_level = 0;
         auto els_output = packingwhiletravelling::efficient_local_search(
                 pwt_instance,
                 els_parameters);
@@ -142,9 +125,7 @@ IterativeTspPwtTtpOutput travellingthiefsolver::travellingthief::iterative_tsp_p
         output.number_of_els_calls++;
 
         // Update output.
-        std::stringstream ss;
-        ss << "initial els";
-        output.update_solution(els_solution, ss, parameters.info);
+        algorithm_formatter.update_solution(els_solution, "initial els");
 
         auto pwt_end = std::chrono::steady_clock::now();
         std::chrono::duration<double> pwt_time_span
@@ -154,10 +135,11 @@ IterativeTspPwtTtpOutput travellingthiefsolver::travellingthief::iterative_tsp_p
         auto ttp_begin = std::chrono::steady_clock::now();
 
         // Run TTP-ELS.
-        EfficientLocalSearchOptionalParameters ttpels_parameters;
+        EfficientLocalSearchParameters ttpels_parameters;
+        ttpels_parameters.timer = parameters.timer;
+        ttpels_parameters.verbosity_level = 0;
         ttpels_parameters.initial_solution = &els_solution;
         ttpels_parameters.lkh_candidate_file_content = lkh_candidate_file_content;
-        //ttpels_parameters.info.set_verbosity_level(1);
         auto ttpels_output = efficient_local_search(
                 instance,
                 generator,
@@ -165,9 +147,7 @@ IterativeTspPwtTtpOutput travellingthiefsolver::travellingthief::iterative_tsp_p
         //std::cout << "ttpels " << ttpels_output.solution.objective() << std::endl;
         // Update output.
         {
-            std::stringstream ss;
-            ss << "initial ttpels";
-            output.update_solution(ttpels_output.solution, ss, parameters.info);
+            algorithm_formatter.update_solution(ttpels_output.solution, "initial ttpels");
         }
 
         auto ttp_end = std::chrono::steady_clock::now();
@@ -178,7 +158,7 @@ IterativeTspPwtTtpOutput travellingthiefsolver::travellingthief::iterative_tsp_p
     }
 
     for (Counter number_of_iterations = 0;
-            !parameters.info.needs_to_end();
+            !parameters.timer.needs_to_end();
             ++number_of_iterations) {
 
         auto tsp_begin = std::chrono::steady_clock::now();
@@ -188,6 +168,7 @@ IterativeTspPwtTtpOutput travellingthiefsolver::travellingthief::iterative_tsp_p
                 instance,
                 tsp_instance,
                 generator,
+                parameters,
                 lkh_candidate_file_content);
 
         auto tsp_end = std::chrono::steady_clock::now();
@@ -204,8 +185,9 @@ IterativeTspPwtTtpOutput travellingthiefsolver::travellingthief::iterative_tsp_p
                     instance,
                     tsp_solution);
 
-            packingwhiletravelling::SequentialValueCorrectionOptionalParameters svc_parameters;
-            //pwt_parameters.parameters.info.set_verbosity_level(1);
+            packingwhiletravelling::SequentialValueCorrectionParameters svc_parameters;
+            svc_parameters.timer = parameters.timer;
+            svc_parameters.verbosity_level = 0;
             auto svc_output = packingwhiletravelling::sequential_value_correction(
                     pwt_instance,
                     svc_parameters);
@@ -221,14 +203,15 @@ IterativeTspPwtTtpOutput travellingthiefsolver::travellingthief::iterative_tsp_p
             // Update output.
             std::stringstream ss;
             ss << "iteration " << number_of_iterations << " (svc)";
-            output.update_solution(svc_solution, ss, parameters.info);
+            algorithm_formatter.update_solution(svc_solution, ss.str());
 
             auto pwt_end = std::chrono::steady_clock::now();
             std::chrono::duration<double> pwt_time_span
                 = std::chrono::duration_cast<std::chrono::duration<double>>(pwt_end - pwt_begin);
             output.pwt_time += pwt_time_span.count();
 
-            if (svc_solution.objective() > svc_solutions.back().objective()) {
+            if (svc_solution.objective_value()
+                    > svc_solutions.back().objective_value()) {
 
                 auto pwt_begin = std::chrono::steady_clock::now();
 
@@ -240,12 +223,15 @@ IterativeTspPwtTtpOutput travellingthiefsolver::travellingthief::iterative_tsp_p
                             const Solution& solution_1,
                             const Solution& solution_2) -> bool
                         {
-                            return solution_1.objective() > solution_2.objective();
+                            return solution_1.objective_value()
+                                > solution_2.objective_value();
                         });
                 while ((Counter)svc_solutions.size() > svc_solutions_size)
                     svc_solutions.pop_back();
 
-                packingwhiletravelling::EfficientLocalSearchOptionalParameters els_parameters;
+                packingwhiletravelling::EfficientLocalSearchParameters els_parameters;
+                els_parameters.timer = parameters.timer;
+                els_parameters.verbosity_level = 0;
                 auto els_output = packingwhiletravelling::efficient_local_search(
                         pwt_instance,
                         els_parameters);
@@ -262,7 +248,7 @@ IterativeTspPwtTtpOutput travellingthiefsolver::travellingthief::iterative_tsp_p
                 // Update output.
                 std::stringstream ss;
                 ss << "iteration " << number_of_iterations << " (els)";
-                output.update_solution(els_solution, ss, parameters.info);
+                algorithm_formatter.update_solution(els_solution, ss.str());
 
                 auto pwt_end = std::chrono::steady_clock::now();
                 std::chrono::duration<double> pwt_time_span
@@ -272,10 +258,11 @@ IterativeTspPwtTtpOutput travellingthiefsolver::travellingthief::iterative_tsp_p
                 auto ttp_begin = std::chrono::steady_clock::now();
 
                 // Run TTP-ELS.
-                EfficientLocalSearchOptionalParameters ttpels_parameters;
+                EfficientLocalSearchParameters ttpels_parameters;
+                ttpels_parameters.timer = parameters.timer;
+                ttpels_parameters.verbosity_level = 0;
                 ttpels_parameters.initial_solution = &els_solution;
                 ttpels_parameters.lkh_candidate_file_content = lkh_candidate_file_content;
-                //ttpels_parameters.info.set_verbosity_level(1);
                 auto ttpels_output = efficient_local_search(
                         instance,
                         generator,
@@ -285,7 +272,7 @@ IterativeTspPwtTtpOutput travellingthiefsolver::travellingthief::iterative_tsp_p
                 {
                     std::stringstream ss;
                     ss << "iteration " << number_of_iterations << " (ttpels)";
-                    output.update_solution(ttpels_output.solution, ss, parameters.info);
+                    algorithm_formatter.update_solution(ttpels_output.solution, ss.str());
                 }
 
                 auto ttp_end = std::chrono::steady_clock::now();
@@ -298,7 +285,6 @@ IterativeTspPwtTtpOutput travellingthiefsolver::travellingthief::iterative_tsp_p
 
     }
 
-
-    output.algorithm_end(parameters.info);
+    algorithm_formatter.end();
     return output;
 }

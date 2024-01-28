@@ -2,14 +2,12 @@
 
 #include "travellingthiefsolver/travellingthief/solution.hpp"
 
-#include "travelingsalesmansolver/algorithms/lkh.hpp"
-
 namespace travellingthiefsolver
 {
 namespace travellingthief
 {
 
-struct EfficientLocalSearchOptionalParameters
+struct EfficientLocalSearchParameters: Parameters
 {
     /** Initial solution. */
     const Solution* initial_solution = nullptr;
@@ -37,41 +35,43 @@ struct EfficientLocalSearchOptionalParameters
 
     /** Enable change-two-city-states neighborhood. */
     int neighborhood_change_two_city_states = 0;
-
-    /** Info structure. */
-    optimizationtools::Info info = optimizationtools::Info();
 };
 
 struct EfficientLocalSearchOutput: Output
 {
     EfficientLocalSearchOutput(
-            const Instance& instance,
-            optimizationtools::Info& info):
-        Output(instance, info) { }
+            const Instance& instance):
+        Output(instance) { }
 
-    void print_statistics(
-            optimizationtools::Info& info) const override;
 
     Counter number_of_local_search_calls = 0;
+
     Counter number_of_iterations = 0;
+
     Counter number_of_improvements = 0;
+
     Counter number_of_change_city_state_improvements = 0;
+
     Counter number_of_two_opt_improvements = 0;
+
     Counter number_of_two_opt_change_city_states_improvements = 0;
+
     Counter number_of_shift_improvements = 0;
+
     Counter number_of_shift_change_city_state_improvements = 0;
+
     Counter number_of_change_two_city_states_improvements = 0;
 };
 
-EfficientLocalSearchOutput efficient_local_search(
+const EfficientLocalSearchOutput efficient_local_search(
         const Instance& instance,
         std::mt19937_64& generator,
-        EfficientLocalSearchOptionalParameters parameters = {});
+        const EfficientLocalSearchParameters& parameters = {});
 
-EfficientLocalSearchOutput efficient_genetic_local_search(
+const EfficientLocalSearchOutput efficient_genetic_local_search(
         const Instance& instance,
         std::mt19937_64& generator,
-        EfficientLocalSearchOptionalParameters parameters = {});
+        const EfficientLocalSearchParameters& parameters = {});
 
 }
 }

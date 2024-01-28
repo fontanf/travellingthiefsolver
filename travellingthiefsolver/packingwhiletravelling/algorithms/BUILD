@@ -2,7 +2,7 @@ cc_library(
         name = "greedy",
         hdrs = ["greedy.hpp"],
         srcs = ["greedy.cpp"],
-        deps = ["//travellingthiefsolver/packingwhiletravelling:packingwhiletravellingsolver"],
+        deps = ["//travellingthiefsolver/packingwhiletravelling:packingwhiletravelling"],
         visibility = ["//visibility:public"],
 )
 
@@ -11,8 +11,8 @@ cc_library(
         hdrs = ["sequential_value_correction.hpp"],
         srcs = ["sequential_value_correction.cpp"],
         deps = [
-                "//travellingthiefsolver/packingwhiletravelling:packingwhiletravellingsolver",
-                "@knapsacksolver//knapsacksolver/algorithms:dynamic_programming_primal_dual",
+                "//travellingthiefsolver/packingwhiletravelling:packingwhiletravelling",
+                "@knapsacksolver//knapsacksolver/knapsack/algorithms:dynamic_programming_primal_dual",
         ],
         visibility = ["//visibility:public"],
 )
@@ -22,7 +22,7 @@ cc_library(
         hdrs = ["dynamic_programming.hpp"],
         srcs = ["dynamic_programming.cpp"],
         deps = [
-                "//travellingthiefsolver/packingwhiletravelling:packingwhiletravellingsolver",
+                "//travellingthiefsolver/packingwhiletravelling:packingwhiletravelling",
         ],
         visibility = ["//visibility:public"],
 )
@@ -33,7 +33,7 @@ cc_library(
         srcs = ["efficient_local_search.cpp"],
         deps = [
                 ":sequential_value_correction",
-                "//travellingthiefsolver/packingwhiletravelling:packingwhiletravellingsolver",
+                "//travellingthiefsolver/packingwhiletravelling:packingwhiletravelling",
         ],
         visibility = ["//visibility:public"],
 )
@@ -43,26 +43,10 @@ cc_library(
         hdrs = ["large_neighborhood_search.hpp"],
         srcs = ["large_neighborhood_search.cpp"],
         deps = [
+                ":sequential_value_correction",
                 "//travellingthiefsolver/packingwhiletravelling/algorithms:greedy",
-                "//travellingthiefsolver/packingwhiletravelling:packingwhiletravellingsolver",
-                ":sequential_value_correction",
-                "@knapsacksolver//knapsacksolver/algorithms:dynamic_programming_primal_dual",
+                "//travellingthiefsolver/packingwhiletravelling:packingwhiletravelling",
+                "@knapsacksolver//knapsacksolver/knapsack/algorithms:dynamic_programming_primal_dual",
         ],
         visibility = ["//visibility:public"],
 )
-
-cc_library(
-        name = "algorithms",
-        hdrs = ["algorithms.hpp"],
-        srcs = ["algorithms.cpp"],
-        deps = [
-                ":greedy",
-                ":sequential_value_correction",
-                ":dynamic_programming",
-                ":efficient_local_search",
-                ":large_neighborhood_search",
-                "@boost//:program_options",
-        ],
-        visibility = ["//visibility:public"],
-)
-

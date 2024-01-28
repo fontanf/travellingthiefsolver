@@ -1,16 +1,14 @@
 #include "travellingthiefsolver/thieforienteering/instance.hpp"
 
-#include "travellingthiefsolver/thieforienteering/instance_builder.hpp"
-
-#include "optimizationtools/utils/utils.hpp"
+#include <iomanip>
 
 using namespace travellingthiefsolver::thieforienteering;
 
-std::ostream& Instance::print(
+std::ostream& Instance::format(
         std::ostream& os,
-        int verbose) const
+        int verbosity_level) const
 {
-    if (verbose >= 1) {
+    if (verbosity_level >= 1) {
         os
             << "Number of cities:  " << number_of_cities() << std::endl
             << "Number of items:   " << number_of_items() << std::endl
@@ -24,7 +22,7 @@ std::ostream& Instance::print(
             ;
     }
 
-    if (verbose >= 2) {
+    if (verbosity_level >= 2) {
         os << std::endl
             << std::setw(12) << "City"
             << std::setw(12) << "# items"
@@ -43,7 +41,7 @@ std::ostream& Instance::print(
         }
     }
 
-    if (verbose >= 2) {
+    if (verbosity_level >= 2) {
         os << std::endl
             << std::setw(12) << "Item"
             << std::setw(12) << "City"
@@ -68,7 +66,7 @@ std::ostream& Instance::print(
         }
     }
 
-    if (verbose >= 3) {
+    if (verbosity_level >= 3) {
         os << std::endl
             << std::setw(12) << "City 1"
             << std::setw(12) << "City 2"
@@ -94,23 +92,4 @@ std::ostream& Instance::print(
     }
 
     return os;
-}
-
-void travellingthiefsolver::thieforienteering::init_display(
-        const Instance& instance,
-        optimizationtools::Info& info)
-{
-    info.os()
-        << "=====================================" << std::endl
-        << "        TravellingThiefSolver        " << std::endl
-        << "=====================================" << std::endl
-        << std::endl
-        << "Problem" << std::endl
-        << "-------" << std::endl
-        << "Thief orienteering problem" << std::endl
-        << std::endl
-        << "Instance" << std::endl
-        << "--------" << std::endl;
-    instance.print(info.os(), info.verbosity_level());
-    info.os() << std::endl;
 }

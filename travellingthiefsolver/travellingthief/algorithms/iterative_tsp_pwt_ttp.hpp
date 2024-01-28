@@ -7,24 +7,18 @@ namespace travellingthiefsolver
 namespace travellingthief
 {
 
-struct IterativeTspPwtTtpOptionalParameters
+struct IterativeTspPwtTtpParameters: Parameters
 {
     /** Maximum number of iterations. */
     Counter maximum_number_of_iterations = -1;
-
-    /** Info structure. */
-    optimizationtools::Info info = optimizationtools::Info();
 };
 
 struct IterativeTspPwtTtpOutput: Output
 {
     IterativeTspPwtTtpOutput(
-            const Instance& instance,
-            optimizationtools::Info& info):
-        Output(instance, info) { }
+            const Instance& instance):
+        Output(instance) { }
 
-    void print_statistics(
-            optimizationtools::Info& info) const override;
 
     /** Number of SVC calls. */
     Counter number_of_svc_calls = 0;
@@ -42,10 +36,10 @@ struct IterativeTspPwtTtpOutput: Output
     double ttp_time = 0.0;
 };
 
-IterativeTspPwtTtpOutput iterative_tsp_pwt_ttp(
+const IterativeTspPwtTtpOutput iterative_tsp_pwt_ttp(
         const Instance& instance,
         std::mt19937_64& generator,
-        IterativeTspPwtTtpOptionalParameters parameters = {});
+        const IterativeTspPwtTtpParameters& parameters = {});
 
 }
 }

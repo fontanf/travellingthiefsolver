@@ -78,7 +78,10 @@ private:
     void compute_distances_start_end();
 
     /** Compute the sum of all the weights (items and cities). */
-    void compute_weight_sum();
+    void compute_total_weight();
+
+    /** Compute the sum of the profits of the items. */
+    void compute_total_item_profit();
 
     /** Compute weight_from_start for each city. */
     void compute_weight_from_start();

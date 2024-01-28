@@ -1,5 +1,6 @@
 #include "travellingthiefsolver/travellingthief/algorithms/efficient_local_search.hpp"
 
+#include "travellingthiefsolver/travellingthief/algorithm_formatter.hpp"
 #include "travellingthiefsolver/travellingthief/utils.hpp"
 #include "travellingthiefsolver/packingwhiletravelling/utils.hpp"
 #include "travellingthiefsolver/packingwhiletravelling/algorithms/sequential_value_correction.hpp"
@@ -16,24 +17,6 @@ using namespace travellingthiefsolver::travellingthief;
 
 using CityState = travellingthiefsolver::packingwhiletravelling::CityState;
 using CityStateId = travellingthiefsolver::packingwhiletravelling::CityStateId;
-
-void EfficientLocalSearchOutput::print_statistics(
-        optimizationtools::Info& info) const
-{
-    if (info.verbosity_level() >= 1) {
-        info.os()
-            << "Number of iterations:         " << number_of_iterations << std::endl
-            << "Number of improvements:       " << number_of_improvements << std::endl
-            << "# of CSS impr.:               " << number_of_change_city_state_improvements << std::endl
-            << "# of 2O improvements:         " << number_of_two_opt_improvements << std::endl
-            << "# of 2OCCS improvements:      " << number_of_two_opt_change_city_states_improvements << std::endl
-            << "# of S improvements:          " << number_of_shift_improvements << std::endl
-            << "# of SCCS improvements:       " << number_of_shift_change_city_state_improvements << std::endl
-            << "# of CTCS improvements:       " << number_of_change_two_city_states_improvements << std::endl
-            ;
-    }
-    info.add_to_json("Algorithm", "NumberOfIterations", number_of_iterations);
-}
 
 struct EfficientLocalSearchSolutionCity
 {
@@ -307,8 +290,9 @@ public:
     EfficientLocalScheme(
             const Instance& instance,
             const std::vector<std::vector<CityState>>& city_states,
-            EfficientLocalSearchOptionalParameters& parameters,
+            const EfficientLocalSearchParameters& parameters,
             EfficientLocalSearchOutput& output,
+            AlgorithmFormatter& algorithm_formatter,
             std::mt19937_64& generator);
 
     /*
@@ -359,6 +343,7 @@ public:
                 instance_,
                 tsp_instance_,
                 generator,
+                parameters_,
                 lkh_candidate_file_content_);
 
         for (const auto& tsp_solution: tsp_solutions) {
@@ -368,8 +353,8 @@ public:
                     instance_,
                     tsp_solution);
 
-            travellingthiefsolver::packingwhiletravelling::EfficientLocalSearchOptionalParameters els_parameters;
-            //pwt_parameters.parameters.info.set_verbosity_level(1);
+            travellingthiefsolver::packingwhiletravelling::EfficientLocalSearchParameters els_parameters;
+            els_parameters.verbosity_level = 0;
             auto els_output = travellingthiefsolver::packingwhiletravelling::efficient_local_search(
                     pwt_instance,
                     els_parameters);
@@ -397,8 +382,7 @@ public:
                     city_ids,
                     city_state_ids);
             local_search(ls_solution, generator);
-            std::stringstream ss;
-            output_.update_solution(ls_solution.to_solution(), ss, parameters_.info);
+            algorithm_formatter_.update_solution(ls_solution.to_solution(), "");
             initial_solutions_.push_back(ls_solution);
         }
     }
@@ -593,10 +577,13 @@ private:
     std::vector<travelingsalesmansolver::LkhCandidate> lkh_candidates_;
 
     /** Parameters. */
-    EfficientLocalSearchOptionalParameters& parameters_;
+    const EfficientLocalSearchParameters& parameters_;
 
     /** Output. */
     EfficientLocalSearchOutput& output_;
+
+    /** Algorithm formatter. */
+    AlgorithmFormatter& algorithm_formatter_;
 
     /** Moves. */
     std::vector<std::vector<Move>> moves_;
@@ -609,15 +596,17 @@ private:
 EfficientLocalScheme::EfficientLocalScheme(
         const Instance& instance,
         const std::vector<std::vector<CityState>>& city_states,
-        EfficientLocalSearchOptionalParameters& parameters,
+        const EfficientLocalSearchParameters& parameters,
         EfficientLocalSearchOutput& output,
+        AlgorithmFormatter& algorithm_formatter,
         std::mt19937_64& generator):
     instance_(instance),
     city_states_(city_states),
     tsp_instance_(create_tsp_instance(instance)),
     lkh_candidate_file_content_(parameters.lkh_candidate_file_content),
     parameters_(parameters),
-    output_(output)
+    output_(output),
+    algorithm_formatter_(algorithm_formatter)
 {
     if (parameters.lkh_candidate_file_content.empty())
         generate_initial_solutions(generator);
@@ -752,7 +741,7 @@ void EfficientLocalScheme::local_search(
 
     Counter number_of_iterations = 0;
     for (number_of_iterations = 0;
-            !parameters_.info.needs_to_end();
+            !parameters_.timer.needs_to_end();
             ++number_of_iterations) {
 
         //std::cout << "number_of_iterations " << number_of_iterations
@@ -2365,30 +2354,16 @@ ItemId EfficientLocalScheme::distance(
     return d;
 }
 
-EfficientLocalSearchOutput travellingthiefsolver::travellingthief::efficient_local_search(
+const EfficientLocalSearchOutput travellingthiefsolver::travellingthief::efficient_local_search(
         const Instance& instance,
         std::mt19937_64& generator,
-        EfficientLocalSearchOptionalParameters parameters)
+        const EfficientLocalSearchParameters& parameters)
 {
-    init_display(instance, parameters.info);
-    parameters.info.os()
-        << "Algorithm" << std::endl
-        << "---------" << std::endl
-        << "Efficient local search" << std::endl
-        << std::endl
-        << "Parameters" << std::endl
-        << "----------" << std::endl
-        << "Neighborhoods" << std::endl
-        << "    Change-city-state:           " << parameters.neighborhood_change_city_state << std::endl
-        << "    Two-opt:                     " << parameters.neighborhood_two_opt << std::endl
-        << "    Two-opt-change-city-states:  " << parameters.neighborhood_two_opt_change_city_states << std::endl
-        << "    Shift:                       " << parameters.neighborhood_shift << std::endl
-        << "    Shift-Change-city-state:     " << parameters.neighborhood_shift_change_city_state << std::endl
-        << "    Shift-Change-city-state 2:   " << parameters.neighborhood_shift_change_city_state_2 << std::endl
-        << "    Change-two-city-state:       " << parameters.neighborhood_change_two_city_states << std::endl
-        << std::endl;
+    EfficientLocalSearchOutput output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Efficient local search");
+    algorithm_formatter.print_header();
 
-    EfficientLocalSearchOutput output(instance, parameters.info);
     auto city_states = packingwhiletravelling::compute_city_states<Instance>(instance);
 
     EfficientLocalScheme local_scheme(
@@ -2396,6 +2371,7 @@ EfficientLocalSearchOutput travellingthiefsolver::travellingthief::efficient_loc
             city_states,
             parameters,
             output,
+            algorithm_formatter,
             generator);
 
     auto solution = local_scheme.empty_solution();
@@ -2423,37 +2399,22 @@ EfficientLocalSearchOutput travellingthiefsolver::travellingthief::efficient_loc
     }
     local_scheme.local_search(solution, generator);
 
-    std::stringstream ss;
-    output.update_solution(solution.to_solution(), ss, parameters.info);
+    algorithm_formatter.update_solution(solution.to_solution(), "");
 
-    output.algorithm_end(parameters.info);
+    algorithm_formatter.end();
     return output;
 }
 
-EfficientLocalSearchOutput travellingthiefsolver::travellingthief::efficient_genetic_local_search(
+const EfficientLocalSearchOutput travellingthiefsolver::travellingthief::efficient_genetic_local_search(
         const Instance& instance,
         std::mt19937_64& generator,
-        EfficientLocalSearchOptionalParameters parameters)
+        const EfficientLocalSearchParameters& parameters)
 {
-    init_display(instance, parameters.info);
-    parameters.info.os()
-        << "Algorithm" << std::endl
-        << "---------" << std::endl
-        << "Efficient genetic local search" << std::endl
-        << std::endl
-        << "Parameters" << std::endl
-        << "----------" << std::endl
-        << "Neighborhoods" << std::endl
-        << "    Change-city-state:           " << parameters.neighborhood_change_city_state << std::endl
-        << "    Two-opt:                     " << parameters.neighborhood_two_opt << std::endl
-        << "    Two-opt-change-city-states:  " << parameters.neighborhood_two_opt_change_city_states << std::endl
-        << "    Shift:                       " << parameters.neighborhood_shift << std::endl
-        << "    Shift-Change-city-state:     " << parameters.neighborhood_shift_change_city_state << std::endl
-        << "    Shift-Change-city-state 2:   " << parameters.neighborhood_shift_change_city_state_2 << std::endl
-        << "    Change-two-city-state:       " << parameters.neighborhood_change_two_city_states << std::endl
-        << std::endl;
+    EfficientLocalSearchOutput output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Efficient genetic local search");
+    algorithm_formatter.print_header();
 
-    EfficientLocalSearchOutput output(instance, parameters.info);
     auto city_states = packingwhiletravelling::compute_city_states<Instance>(instance);
 
     EfficientLocalScheme local_scheme(
@@ -2461,25 +2422,26 @@ EfficientLocalSearchOutput travellingthiefsolver::travellingthief::efficient_gen
             city_states,
             parameters,
             output,
+            algorithm_formatter,
             generator);
 
     for (Counter i = 0; i < 64; ++i)
         local_scheme.generate_initial_solutions(generator);
 
-    localsearchsolver::GeneticLocalSearchOptionalParameters<EfficientLocalScheme> ls_parameters;
-    ls_parameters.info = optimizationtools::Info(parameters.info, false, "");
-    //ls_parameters.info.set_verbosity_level(1);
+    localsearchsolver::GeneticLocalSearchParameters<EfficientLocalScheme> ls_parameters;
+    ls_parameters.timer = parameters.timer;
+    ls_parameters.verbosity_level = 0;
     ls_parameters.number_of_threads = 1;
     ls_parameters.new_solution_callback
-        = [&parameters, &output](
-                const EfficientLocalScheme::Solution& solution)
+        = [&algorithm_formatter](
+                const localsearchsolver::Output<EfficientLocalScheme>& ls_output)
         {
-            std::stringstream ss;
-            output.update_solution(solution.to_solution(), ss, parameters.info);
+            algorithm_formatter.update_solution(
+                    ls_output.solution_pool.best().to_solution(),
+                    "");
         };
     localsearchsolver::genetic_local_search(local_scheme, ls_parameters);
 
-    output.algorithm_end(parameters.info);
+    algorithm_formatter.end();
     return output;
 }
-

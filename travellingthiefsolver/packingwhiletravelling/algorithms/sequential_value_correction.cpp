@@ -1,51 +1,63 @@
 #include "travellingthiefsolver/packingwhiletravelling/algorithms/sequential_value_correction.hpp"
 
+#include "travellingthiefsolver/packingwhiletravelling/algorithm_formatter.hpp"
 #include "travellingthiefsolver/packingwhiletravelling/solution_builder.hpp"
 
-#include "knapsacksolver/algorithms/dynamic_programming_primal_dual.hpp"
+#include "knapsacksolver/knapsack/instance_builder.hpp"
+#include "knapsacksolver/knapsack/algorithms/dynamic_programming_primal_dual.hpp"
 
 using namespace travellingthiefsolver::packingwhiletravelling;
 
+namespace
+{
+
 Solution solve(
         const Instance& instance,
-        SequentialValueCorrectionOptionalParameters& parameters,
-        Output& output,
+        AlgorithmFormatter& algorithm_formatter,
         double alpha)
 {
     // Build knapsack instance.
     std::vector<ItemId> kp2pwt;
-    knapsacksolver::Instance kp_instance;
-    kp_instance.set_capacity(instance.capacity() - instance.city_weight());
+    knapsacksolver::knapsack::InstanceFromFloatProfitsBuilder kp_instance_builder;
     for (ItemId item_id = 0;
             item_id < instance.number_of_items();
             ++item_id) {
         const Item& item = instance.item(item_id);
         const City& city = instance.city(item.city_id);
+
+        // Compute the profit of the item in the knapsack instance.
         Profit profit = item.profit - alpha * item.weight * city.distance_to_end;
+
         // Skip items with negative profit.
         if (profit <= 0)
             continue;
-        knapsacksolver::Profit kp_profit = std::round(profit * 10000);
-        kp_instance.add_item(item.weight, kp_profit);
+
+        // Add the item to the knapsack instance.
+        kp_instance_builder.add_item(profit, item.weight);
         kp2pwt.push_back(item_id);
     }
+    kp_instance_builder.set_capacity(instance.capacity() - instance.city_weight());
+    knapsacksolver::knapsack::Instance kp_instance = kp_instance_builder.build();
 
     // Solve knapsack problem.
-    knapsacksolver::DynamicProgrammingPrimalDualOptionalParameters kp_parameters;
-    kp_parameters.set_combo();
-    //kp_parameters.info.set_verbosity_level(1);
-    auto kp_output = knapsacksolver::dynamic_programming_primal_dual(
+    knapsacksolver::knapsack::DynamicProgrammingPrimalDualParameters kp_parameters;
+    kp_parameters.verbosity_level = 0;
+    auto kp_output = knapsacksolver::knapsack::dynamic_programming_primal_dual(
             kp_instance,
             kp_parameters);
     //std::cout << "kp " << kp_output.solution.profit() << std::endl;
 
     // Retrieve solution.
-    SolutionBuilder solution_builder(instance);
-    for (knapsacksolver::ItemIdx kp_item_id = 0;
+    SolutionBuilder solution_builder;
+    solution_builder.set_instance(instance);
+    // Loop though knapsack items.
+    for (knapsacksolver::knapsack::ItemId kp_item_id = 0;
             kp_item_id < kp_instance.number_of_items();
             ++kp_item_id) {
-        if (kp_output.solution.contains_idx(kp_item_id)) {
+        if (kp_output.solution.contains(kp_item_id)) {
+            // Retrieve the id of the item in the pwt instance.
             ItemId item_id = kp2pwt[kp_item_id];
+            // Add the item to the solution.
             solution_builder.add_item(item_id);
         }
     }
@@ -56,41 +68,26 @@ Solution solve(
     //    << " obj " << solution.objective()
     //    << std::endl;
 
-    // Update output.
-    std::stringstream ss;
-    //ss << "iteration " << number_of_iterations;
-    output.update_solution(solution, ss, parameters.info);
+    // Update solution.
+    algorithm_formatter.update_solution(solution, "");
 
     return solution;
 }
 
+}
+
 Output travellingthiefsolver::packingwhiletravelling::sequential_value_correction(
-        const Instance& original_instance,
-        SequentialValueCorrectionOptionalParameters parameters)
+        const Instance& instance,
+        const SequentialValueCorrectionParameters& parameters)
 {
-    init_display(original_instance, parameters.info);
-    parameters.info.os()
-        << "Algorithm" << std::endl
-        << "---------" << std::endl
-        << "Sequential value correction" << std::endl
-        << std::endl;
+    Output output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Sequential value correction");
+    algorithm_formatter.print_header();
 
     // Reduction.
-    std::unique_ptr<Instance> reduced_instance = nullptr;
-    if (parameters.reduction_parameters.reduce) {
-        reduced_instance = std::unique_ptr<Instance>(
-                new Instance(
-                    original_instance.reduce(
-                        parameters.reduction_parameters)));
-        parameters.info.os()
-            << "Reduced instance" << std::endl
-            << "----------------" << std::endl;
-        reduced_instance->print(parameters.info.os(), parameters.info.verbosity_level());
-        parameters.info.os() << std::endl;
-    }
-    const Instance& instance = (reduced_instance == nullptr)? original_instance: *reduced_instance;
-
-    Output output(original_instance, parameters.info);
+    if (parameters.reduction_parameters.reduce)
+        return solve_reduced_instance(sequential_value_correction, instance, parameters, algorithm_formatter, output);
 
     double alpha_min = 0;
 
@@ -102,8 +99,8 @@ Output travellingthiefsolver::packingwhiletravelling::sequential_value_correctio
         alpha_max = std::max(alpha_max, a);
     }
 
-    Profit obj_min = solve(instance, parameters, output, alpha_min).objective();
-    Profit obj_max = solve(instance, parameters, output, alpha_max).objective();
+    Profit obj_min = solve(instance, algorithm_formatter, alpha_min).objective_value();
+    Profit obj_max = solve(instance, algorithm_formatter, alpha_max).objective_value();
 
     for (Counter number_of_iterations = 0;
             number_of_iterations < 64;
@@ -113,9 +110,9 @@ Output travellingthiefsolver::packingwhiletravelling::sequential_value_correctio
             break;
 
         double alpha_1 = 0.6666 * alpha_min + 0.3333 * alpha_max;
-        Profit obj_1 = solve(instance, parameters, output, alpha_1).objective();
+        Profit obj_1 = solve(instance, algorithm_formatter, alpha_1).objective_value();
         double alpha_2 = 0.3333 * alpha_min + 0.6666 * alpha_max;
-        Profit obj_2 = solve(instance, parameters, output, alpha_2).objective();
+        Profit obj_2 = solve(instance, algorithm_formatter, alpha_2).objective_value();
 
         if (alpha_1 <= alpha_min
                 || alpha_2 >= alpha_max
@@ -158,5 +155,6 @@ Output travellingthiefsolver::packingwhiletravelling::sequential_value_correctio
         }
     }
 
-    return output.algorithm_end(parameters.info);
+    algorithm_formatter.end();
+    return output;
 }

@@ -9,24 +9,13 @@
 
 using namespace travellingthiefsolver::travellingthief;
 
-void LargeNeighborhoodSearchOutput::print_statistics(
-        optimizationtools::Info& info) const
-{
-    if (info.verbosity_level() >= 1) {
-        info.os()
-            << "Number of iterations:         " << number_of_iterations << std::endl
-            ;
-    }
-    info.add_to_json("Algorithm", "NumberOfIterations", number_of_iterations);
-}
-
 namespace
 {
 
 Solution large_neighborhood_search_initial_solution(
         const Instance& instance,
         std::mt19937_64& generator,
-        const LargeNeighborhoodSearchOptionalParameters& parameters,
+        const LargeNeighborhoodSearchParameters& parameters,
         std::string& lkh_candidate_file_content)
 {
     auto tsp_instance = create_tsp_instance(instance);
@@ -41,6 +30,7 @@ Solution large_neighborhood_search_initial_solution(
                 instance,
                 tsp_instance,
                 generator,
+                parameters,
                 lkh_candidate_file_content);
 
         for (Counter svc_iteration = 0;
@@ -52,9 +42,9 @@ Solution large_neighborhood_search_initial_solution(
                     instance,
                     tsp_solutions[svc_iteration]);
 
-            travellingthiefsolver::packingwhiletravelling::SequentialValueCorrectionOptionalParameters svc_parameters;
-            svc_parameters.info = optimizationtools::Info(parameters.info, false, "");
-            //svc_parameters.info.set_verbosity_level(1);
+            travellingthiefsolver::packingwhiletravelling::SequentialValueCorrectionParameters svc_parameters;
+            svc_parameters.timer = parameters.timer;
+            svc_parameters.verbosity_level = 0;
             auto svc_output = travellingthiefsolver::packingwhiletravelling::sequential_value_correction(
                     pwt_instance,
                     svc_parameters);
@@ -87,7 +77,7 @@ Solution large_neighborhood_search_initial_solution(
             instance,
             svc_solution);
 
-    travellingthiefsolver::packingwhiletravelling::EfficientLocalSearchOptionalParameters pwtels_parameters;
+    travellingthiefsolver::packingwhiletravelling::EfficientLocalSearchParameters pwtels_parameters;
     pwtels_parameters.info = optimizationtools::Info(parameters.info, false, "");
     auto pwtels_output = travellingthiefsolver::packingwhiletravelling::efficient_local_search(
             pwt_instance,
@@ -114,7 +104,7 @@ struct TwoOptMove
 Output travellingthiefsolver::travellingthief::large_neighborhood_search(
         const Instance& instance,
         std::mt19937_64& generator,
-        LargeNeighborhoodSearchOptionalParameters parameters)
+        LargeNeighborhoodSearchParameters parameters)
 {
     init_display(instance, parameters.info);
     parameters.info.os()
@@ -136,9 +126,7 @@ Output travellingthiefsolver::travellingthief::large_neighborhood_search(
             lkh_candidate_file_content);
 
     // Update output.
-    std::stringstream ss;
-    ss << "initial solution";
-    output.update_solution(solution, ss, parameters.info);
+    algorithm_formatter.update_solution(solution, "initial solution");
 
     std::vector<travelingsalesmansolver::LkhCandidate> lkh_candidates
         = travelingsalesmansolver::read_candidates(lkh_candidate_file_content);
@@ -269,7 +257,7 @@ Output travellingthiefsolver::travellingthief::large_neighborhood_search(
                     pwt_initial_items);
 
             // Solve PWT instance.
-            packingwhiletravelling::EfficientLocalSearchOptionalParameters pwtels_parameters;
+            packingwhiletravelling::EfficientLocalSearchParameters pwtels_parameters;
             pwtels_parameters.info = optimizationtools::Info(parameters.info, false, "");
             pwtels_parameters.initial_solution = &pwt_initial_solution;
             pwtels_parameters.minimum_improvement = 0;
@@ -298,7 +286,7 @@ Output travellingthiefsolver::travellingthief::large_neighborhood_search(
                 // Update output.
                 std::stringstream ss;
                 ss << "iteration " << output.number_of_iterations;
-                output.update_solution(solution, ss, parameters.info);
+                algorithm_formatter.update_solution(solution, ss.str());
 
                 break;
             }
@@ -308,5 +296,6 @@ Output travellingthiefsolver::travellingthief::large_neighborhood_search(
             break;
     }
 
-    return output.algorithm_end(parameters.info);
+    algorithm_formatter.end();
+    return output;
 }

@@ -2,7 +2,8 @@
 
 using namespace travellingthiefsolver::travellingwhilepacking;
 
-Solution::Solution(const Instance& instance):
+Solution::Solution(
+        const Instance& instance):
     instance_(&instance),
     cities_is_visited_(instance.number_of_cities(), false)
 {
@@ -14,7 +15,7 @@ Solution::Solution(const Instance& instance):
 
 Solution::Solution(
         const Instance& instance,
-        std::string certificate_path):
+        const std::string& certificate_path):
     Solution(instance)
 {
     if (certificate_path.empty())
@@ -50,13 +51,23 @@ void Solution::add_city(CityId city_id)
     travel_time_ = travel_time_cur_ + instance().duration(city_id, 0, item_weight_);
 }
 
-std::ostream& Solution::print(
-        std::ostream& os,
-        int verbose) const
+nlohmann::json Solution::to_json() const
 {
-    if (verbose >= 1) {
+    return nlohmann::json {
+        {"NumberOfCities", number_of_cities()},
+        {"Distance", distance()},
+        {"TravelTime", travel_time()},
+        {"RentingCost", renting_cost()},
+    };
+}
+
+std::ostream& Solution::format(
+        std::ostream& os,
+        int verbosity_level) const
+{
+    if (verbosity_level >= 1) {
         os
-            << "Number of vertices:  " << optimizationtools::Ratio<CityId>(number_of_cities(), instance().number_of_cities()) << std::endl
+            << "Number of cities:    " << optimizationtools::Ratio<CityId>(number_of_cities(), instance().number_of_cities()) << std::endl
             << "Distance:            " << distance() << std::endl
             << "Travel time:         " << travel_time() << std::endl
             << "Feasible:            " << feasible() << std::endl
@@ -64,7 +75,7 @@ std::ostream& Solution::print(
             ;
     }
 
-    if (verbose >= 2) {
+    if (verbosity_level >= 2) {
         os << std::endl
             << std::setw(12) << "City"
             << std::endl
@@ -80,7 +91,8 @@ std::ostream& Solution::print(
     return os;
 }
 
-void Solution::write(std::string certificate_path) const
+void Solution::write(
+        const std::string& certificate_path) const
 {
     if (certificate_path.empty())
         return;
@@ -96,119 +108,4 @@ void Solution::write(std::string certificate_path) const
         separator = ",";
     }
     file << "]" << std::endl;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////// Output ////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-Output::Output(
-        const Instance& instance,
-        optimizationtools::Info& info):
-    solution(instance)
-{
-    info.os()
-        << std::setw(12) << "T (s)"
-        << std::setw(12) << "Cost"
-        << std::setw(24) << "Comment"
-        << std::endl
-        << std::setw(12) << "-----"
-        << std::setw(12) << "----"
-        << std::setw(24) << "-------"
-        << std::endl;
-    print(info, std::stringstream(""));
-}
-
-void Output::print(
-        optimizationtools::Info& info,
-        const std::stringstream& s) const
-{
-    double t = info.elapsed_time();
-    std::streamsize precision = std::cout.precision();
-
-    info.os()
-        << std::setw(12) << std::fixed << std::setprecision(3) << t << std::defaultfloat << std::setprecision(precision)
-        << std::setw(12) << solution.renting_cost()
-        << std::setw(24) << s.str()
-        << std::endl;
-
-    if (!info.output->only_write_at_the_end)
-        info.write_json_output();
-}
-
-void Output::update_solution(
-        const Solution& solution_new,
-        const std::stringstream& s,
-        optimizationtools::Info& info)
-{
-    info.lock();
-
-    if (solution_new.feasible()
-            && (!solution.feasible()
-                || solution.renting_cost() > solution_new.renting_cost())) {
-        // Update solution
-        solution = solution_new;
-        print(info, s);
-
-        std::string solution_value = optimizationtools::solution_value(
-                optimizationtools::ObjectiveDirection::Minimize,
-                solution.feasible(),
-                solution.renting_cost());
-        double t = info.elapsed_time();
-
-        info.output->number_of_solutions++;
-        std::string sol_str = "Solution" + std::to_string(info.output->number_of_solutions);
-        info.add_to_json(sol_str, "Value", solution_value);
-        info.add_to_json(sol_str, "Time", t);
-        info.add_to_json(sol_str, "String", s.str());
-        if (!info.output->only_write_at_the_end) {
-            info.write_json_output();
-            solution.write(info.output->certificate_path);
-        }
-    }
-
-    info.unlock();
-}
-
-Output& Output::algorithm_end(optimizationtools::Info& info)
-{
-    std::string solution_value = optimizationtools::solution_value(
-            optimizationtools::ObjectiveDirection::Minimize,
-            solution.feasible(),
-            solution.renting_cost());
-    double absolute_optimality_gap = optimizationtools::absolute_optimality_gap(
-            optimizationtools::ObjectiveDirection::Minimize,
-            solution.feasible(),
-            solution.renting_cost(),
-            bound);
-    double relative_optimality_gap = optimizationtools::relative_optimality_gap(
-            optimizationtools::ObjectiveDirection::Minimize,
-            solution.feasible(),
-            solution.renting_cost(),
-            bound);
-    time = info.elapsed_time();
-
-    info.add_to_json("Solution", "Value", solution_value);
-    info.add_to_json("Bound", "Value", bound);
-    info.add_to_json("Solution", "Time", time);
-    info.add_to_json("Bound", "Time", time);
-    info.os()
-        << std::endl
-        << "Final statistics" << std::endl
-        << "----------------" << std::endl
-        << "Value:                        " << solution_value << std::endl
-        << "Bound:                        " << bound << std::endl
-        << "Absolute optimality gap:      " << absolute_optimality_gap << std::endl
-        << "Relative optimality gap (%):  " << relative_optimality_gap * 100 << std::endl
-        << "Time (s):                     " << time << std::endl
-        ;
-    print_statistics(info);
-    info.os() << std::endl
-        << "Solution" << std::endl
-        << "--------" << std::endl ;
-    solution.print(info.os(), info.verbosity_level());
-
-    info.write_json_output();
-    solution.write(info.output->certificate_path);
-    return *this;
 }

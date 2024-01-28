@@ -1,5 +1,9 @@
 #include "travellingthiefsolver/packingwhiletravelling/instance_builder.hpp"
 
+#include "optimizationtools//utils//utils.hpp"
+
+#include <fstream>
+
 using namespace travellingthiefsolver::packingwhiletravelling;
 
 void InstanceBuilder::add_cities(CityId number_of_cities)
@@ -162,23 +166,34 @@ void InstanceBuilder::compute_weight_from_start()
     }
 }
 
-void InstanceBuilder::compute_weight_sum()
+void InstanceBuilder::compute_total_item_profit()
 {
-    instance_.weight_sum_ = 0;
+    instance_.total_item_profit_ = 0;
+    for (CityId item_id = 0;
+            item_id < instance_.number_of_items();
+            ++item_id) {
+        instance_.total_item_profit_ += instance_.item(item_id).profit;
+    }
+}
+
+void InstanceBuilder::compute_total_weight()
+{
+    instance_.total_weight_ = 0;
     for (CityId city_id = 0;
             city_id < instance_.number_of_cities();
             ++city_id) {
         const City& city = instance_.city(city_id);
-        instance_.weight_sum_ += city.weight;
+        instance_.total_weight_ += city.weight;
         for (ItemId item_id: city.item_ids)
-            instance_.weight_sum_ += instance_.item(item_id).weight;
+            instance_.total_weight_ += instance_.item(item_id).weight;
     }
 }
 
 Instance InstanceBuilder::build()
 {
     compute_distances_start_end();
-    compute_weight_sum();
+    compute_total_weight();
+    compute_total_item_profit();
     compute_weight_from_start();
     return std::move(instance_);
 }

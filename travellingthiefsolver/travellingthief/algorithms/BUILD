@@ -3,7 +3,7 @@ cc_library(
         hdrs = ["tree_search.hpp"],
         srcs = ["tree_search.cpp"],
         deps = [
-                "//travellingthiefsolver/travellingthief:travellingthiefsolver",
+                "//travellingthiefsolver/travellingthief:travellingthief",
                 "@treesearchsolver//treesearchsolver:treesearchsolver",
         ],
         visibility = ["//visibility:public"],
@@ -14,8 +14,8 @@ cc_library(
         hdrs = ["local_search.hpp"],
         srcs = ["local_search.cpp"],
         deps = [
-                "//travellingthiefsolver/travellingthief:travellingthiefsolver",
-                "//travellingthiefsolver/packingwhiletravelling:packingwhiletravellingsolver",
+                "//travellingthiefsolver/travellingthief:travellingthief",
+                "//travellingthiefsolver/packingwhiletravelling:packingwhiletravelling",
                 "@localsearchsolver//localsearchsolver:localsearchsolver",
         ],
         visibility = ["//visibility:public"],
@@ -26,8 +26,8 @@ cc_library(
         hdrs = ["efficient_local_search.hpp"],
         srcs = ["efficient_local_search.cpp"],
         deps = [
-                "//travellingthiefsolver/travellingthief:travellingthiefsolver",
-                "//travellingthiefsolver/packingwhiletravelling:packingwhiletravellingsolver",
+                "//travellingthiefsolver/travellingthief:travellingthief",
+                "//travellingthiefsolver/packingwhiletravelling:packingwhiletravelling",
                 "//travellingthiefsolver/packingwhiletravelling/algorithms:sequential_value_correction",
                 "//travellingthiefsolver/packingwhiletravelling/algorithms:efficient_local_search",
                 "@travelingsalesmansolver//travelingsalesmansolver/algorithms:lkh",
@@ -41,7 +41,7 @@ cc_library(
         hdrs = ["iterative_tsp_pwt.hpp"],
         srcs = ["iterative_tsp_pwt.cpp"],
         deps = [
-                "//travellingthiefsolver/travellingthief:travellingthiefsolver",
+                "//travellingthiefsolver/travellingthief:travellingthief",
                 "//travellingthiefsolver/packingwhiletravelling/algorithms:sequential_value_correction",
                 "//travellingthiefsolver/packingwhiletravelling/algorithms:efficient_local_search",
         ],
@@ -53,26 +53,10 @@ cc_library(
         hdrs = ["iterative_tsp_pwt_ttp.hpp"],
         srcs = ["iterative_tsp_pwt_ttp.cpp"],
         deps = [
-                "//travellingthiefsolver/travellingthief:travellingthiefsolver",
+                "//travellingthiefsolver/travellingthief:travellingthief",
                 ":efficient_local_search",
                 "//travellingthiefsolver/packingwhiletravelling/algorithms:sequential_value_correction",
                 "//travellingthiefsolver/packingwhiletravelling/algorithms:efficient_local_search",
         ],
         visibility = ["//visibility:public"],
 )
-
-cc_library(
-        name = "algorithms",
-        hdrs = ["algorithms.hpp"],
-        srcs = ["algorithms.cpp"],
-        deps = [
-                ":tree_search",
-                ":local_search",
-                ":efficient_local_search",
-                ":iterative_tsp_pwt",
-                ":iterative_tsp_pwt_ttp",
-                "@boost//:program_options",
-        ],
-        visibility = ["//visibility:public"],
-)
-

@@ -1,5 +1,6 @@
 #include "travellingthiefsolver/packingwhiletravelling/algorithms/large_neighborhood_search.hpp"
 
+#include "travellingthiefsolver/packingwhiletravelling/algorithm_formatter.hpp"
 #include "travellingthiefsolver/packingwhiletravelling/instance_builder.hpp"
 #include "travellingthiefsolver/packingwhiletravelling/solution_builder.hpp"
 #include "travellingthiefsolver/packingwhiletravelling/algorithms/greedy.hpp"
@@ -9,60 +10,51 @@
 
 using namespace travellingthiefsolver::packingwhiletravelling;
 
-void LargeNeighborhoodSearchOutput::print_statistics(
-        optimizationtools::Info& info) const
-{
-    if (info.verbosity_level() >= 1) {
-        info.os() << "Number of iterations:         " << number_of_iterations << std::endl;
-    }
-    info.add_to_json("Algorithm", "NumberOfIterations", number_of_iterations);
-}
-
 LargeNeighborhoodSearchOutput travellingthiefsolver::packingwhiletravelling::large_neighborhood_search(
-        const Instance& original_instance,
+        const Instance& instance,
         std::mt19937_64& generator,
-        LargeNeighborhoodSearchOptionalParameters parameters)
+        const LargeNeighborhoodSearchParameters& parameters)
 {
-    init_display(original_instance, parameters.info);
-    parameters.info.os()
-        << "Algorithm" << std::endl
-        << "---------" << std::endl
-        << "Large neighborhood search" << std::endl
-        << std::endl;
+    LargeNeighborhoodSearchOutput output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Large neighborhood search");
+    algorithm_formatter.print_header();
 
     // Reduction.
-    std::unique_ptr<Instance> reduced_instance = nullptr;
     if (parameters.reduction_parameters.reduce) {
-        reduced_instance = std::unique_ptr<Instance>(
-                new Instance(
-                    original_instance.reduce(
-                        parameters.reduction_parameters)));
-        parameters.info.os()
-            << "Reduced instance" << std::endl
-            << "----------------" << std::endl;
-        reduced_instance->print(parameters.info.os(), parameters.info.verbosity_level());
-        parameters.info.os() << std::endl;
+        return solve_reduced_instance(
+                [&generator](
+                    const Instance& instance,
+                    const LargeNeighborhoodSearchParameters& parameters)
+                {
+                    return large_neighborhood_search(
+                            instance,
+                            generator,
+                            parameters);
+                },
+                instance,
+                parameters,
+                algorithm_formatter,
+                output);
     }
-    const Instance& instance = (reduced_instance == nullptr)? original_instance: *reduced_instance;
-
-    LargeNeighborhoodSearchOutput output(original_instance, parameters.info);
 
     // Get an initial solution.
-    GreedyOptionalParameters greedy_parameters;
+    GreedyParameters greedy_parameters;
     greedy_parameters.scoring_function = 3;
     //Solution solution_cur = greedy(instance, greedy_parameters).solution;
-    Solution solution_cur = sequential_value_correction(instance).solution;
+    SequentialValueCorrectionParameters svc_parameters;
+    svc_parameters.verbosity_level = 0;
+    Solution solution_cur = sequential_value_correction(instance, svc_parameters).solution;
 
     // Update output.
-    std::stringstream ss;
-    ss << "initial solution";
-    output.update_solution(solution_cur, ss, parameters.info);
+    algorithm_formatter.update_solution(solution_cur, "initial solution");
 
     optimizationtools::IndexedSet removed_items(instance.number_of_items());
     optimizationtools::IndexedSet fixed_items(instance.number_of_items());
 
     Counter number_of_iterations_without_improvement = 0;
-    for (output.number_of_iterations = 0; !parameters.info.needs_to_end();
+    for (output.number_of_iterations = 0;
+            !parameters.timer.needs_to_end();
             ++output.number_of_iterations,
             ++number_of_iterations_without_improvement) {
         // Check stop criteria.
@@ -166,16 +158,17 @@ LargeNeighborhoodSearchOutput travellingthiefsolver::packingwhiletravelling::lar
         }
         Instance new_instance = new_instance_builder.build();
 
-        //GreedyOptionalParameters greedy_parameters;
+        //GreedyParameters greedy_parameters;
         //greedy_parameters.scoring_function = 3;
-        //greedy_parameters.info.set_verbosity_level(1);
+        greedy_parameters.verbosity_level = 0;
         //Solution new_solution = greedy(new_instance, greedy_parameters).solution;
-        SequentialValueCorrectionOptionalParameters svc_parameters;
-        //svc_parameters.info.set_verbosity_level(1);
+        SequentialValueCorrectionParameters svc_parameters;
+        svc_parameters.verbosity_level = 0;
         Solution new_solution = sequential_value_correction(new_instance, svc_parameters).solution;
 
         // Retrieve solution.
-        SolutionBuilder solution_builder(instance);
+        SolutionBuilder solution_builder;
+        solution_builder.set_instance(instance);
         // Add fixed items.
         for (ItemId item_id: fixed_items)
             solution_builder.add_item(item_id);
@@ -193,12 +186,18 @@ LargeNeighborhoodSearchOutput travellingthiefsolver::packingwhiletravelling::lar
         // Update output.
         std::stringstream ss;
         ss << "iteration " << output.number_of_iterations;
-        output.update_solution(solution, ss, parameters.info);
+        algorithm_formatter.update_solution(solution, ss.str());
 
-        if (solution.is_strictly_better_than(solution_cur))
+        if (optimizationtools::is_solution_strictly_better(
+                    objective_direction(),
+                    solution_cur.feasible(),
+                    solution_cur.objective_value(),
+                    solution.feasible(),
+                    solution.objective_value())) {
             solution_cur = solution;
+        }
     }
 
-    output.algorithm_end(parameters.info);
+    algorithm_formatter.end();
     return output;
 }

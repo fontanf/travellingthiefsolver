@@ -4,10 +4,7 @@
 
 #include "travelingsalesmansolver/distances.hpp"
 
-#include "optimizationtools/utils/info.hpp"
-#include "optimizationtools/utils/utils.hpp"
-
-#include <random>
+#include <memory>
 
 namespace travellingthiefsolver
 {
@@ -114,14 +111,20 @@ public:
     /** Get the shared pointer to the distances class. */
     const std::shared_ptr<const travelingsalesmansolver::Distances>& distances_ptr() const { return distances_; }
 
+    /** Get the total weight of the items. */
+    inline Weight total_item_weight() const { return total_item_weight_; }
+
+    /** Get the total profit of the items. */
+    inline Weight total_item_profit() const { return total_item_profit_; }
+
     /*
      * Export
      */
 
     /** Print the instance. */
-    std::ostream& print(
+    std::ostream& format(
             std::ostream& os,
-            int verbose = 1) const;
+            int verbosity_level = 1) const;
 
 private:
 
@@ -158,18 +161,14 @@ private:
     Weight capacity_ = -1;
 
     /** Profit sum. */
-    Profit profit_sum_ = 0;
+    Profit total_item_profit_ = 0;
 
     /** Weight sum. */
-    Weight weight_sum_ = 0;
+    Weight total_item_weight_ = 0;
 
     friend class InstanceBuilder;
 
 };
-
-void init_display(
-        const Instance& instance,
-        optimizationtools::Info& info);
 
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// Inlined methods ////////////////////////////////

@@ -1,22 +1,12 @@
 #include "travellingthiefsolver/packingwhiletravelling/algorithms/efficient_local_search.hpp"
 
+#include "travellingthiefsolver/packingwhiletravelling/algorithm_formatter.hpp"
 #include "travellingthiefsolver/packingwhiletravelling/solution_builder.hpp"
 #include "travellingthiefsolver/packingwhiletravelling/utils.hpp"
 
 #include "travellingthiefsolver/packingwhiletravelling/algorithms/sequential_value_correction.hpp"
 
 using namespace travellingthiefsolver::packingwhiletravelling;
-
-void EfficientLocalSearchOutput::print_statistics(
-        optimizationtools::Info& info) const
-{
-    if (info.verbosity_level() >= 1) {
-        info.os()
-            << "Number of iterations:         " << number_of_iterations << std::endl
-            ;
-    }
-    info.add_to_json("Algorithm", "NumberOfIterations", number_of_iterations);
-}
 
 namespace
 {
@@ -197,21 +187,16 @@ void apply_move(
 
 Solution efficient_local_search_initial_solution(
         const Instance& instance,
-        EfficientLocalSearchOptionalParameters parameters)
+        const EfficientLocalSearchParameters& parameters)
 {
     if (parameters.initial_solution != nullptr) {
-        SolutionBuilder solution_builder(instance);
-        for (ItemId item_id = 0;
-                item_id < instance.number_of_items();
-                ++item_id) {
-            ItemId orig_item_id = instance.unreduction_info().unreduction_operations[item_id];
-            if (parameters.initial_solution->contains(orig_item_id))
-                solution_builder.add_item(item_id);
-        }
-        return solution_builder.build();
+        return *parameters.initial_solution;
     } else {
+        travellingthiefsolver::packingwhiletravelling::SequentialValueCorrectionParameters svc_parameters;
+        svc_parameters.verbosity_level = 0;
         auto svc_output = travellingthiefsolver::packingwhiletravelling::sequential_value_correction(
-                instance);
+                instance,
+                svc_parameters);
         return svc_output.solution;
     }
 }
@@ -219,32 +204,17 @@ Solution efficient_local_search_initial_solution(
 }
 
 EfficientLocalSearchOutput travellingthiefsolver::packingwhiletravelling::efficient_local_search(
-        const Instance& original_instance,
-        EfficientLocalSearchOptionalParameters parameters)
+        const Instance& instance,
+        const EfficientLocalSearchParameters& parameters)
 {
-    init_display(original_instance, parameters.info);
-    parameters.info.os()
-        << "Algorithm" << std::endl
-        << "---------" << std::endl
-        << "Efficient local search" << std::endl
-        << std::endl;
+    EfficientLocalSearchOutput output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Efficient local search");
+    algorithm_formatter.print_header();
 
     // Reduction.
-    std::unique_ptr<Instance> reduced_instance = nullptr;
-    if (parameters.reduction_parameters.reduce) {
-        reduced_instance = std::unique_ptr<Instance>(
-                new Instance(
-                    original_instance.reduce(
-                        parameters.reduction_parameters)));
-        parameters.info.os()
-            << "Reduced instance" << std::endl
-            << "----------------" << std::endl;
-        reduced_instance->print(parameters.info.os(), parameters.info.verbosity_level());
-        parameters.info.os() << std::endl;
-    }
-    const Instance& instance = (reduced_instance == nullptr)? original_instance: *reduced_instance;
-
-    EfficientLocalSearchOutput output(original_instance, parameters.info);
+    if (parameters.reduction_parameters.reduce)
+        return solve_reduced_instance(efficient_local_search, instance, parameters, algorithm_formatter, output);
 
     Solution initial_solution = efficient_local_search_initial_solution(instance, parameters);
 
@@ -256,7 +226,7 @@ EfficientLocalSearchOutput travellingthiefsolver::packingwhiletravelling::effici
             solution2states(instance, city_states, initial_solution));
 
     for (output.number_of_iterations = 0;
-            !parameters.info.needs_to_end();
+            !parameters.timer.needs_to_end();
             ++output.number_of_iterations) {
         Profit objective_cur = solution.objective;
 
@@ -318,7 +288,8 @@ EfficientLocalSearchOutput travellingthiefsolver::packingwhiletravelling::effici
         }
     }
 
-    SolutionBuilder solution_builder(instance);
+    SolutionBuilder solution_builder;
+    solution_builder.set_instance(instance);
     for (CityId city_id = 0;
             city_id < instance.number_of_cities();
             ++city_id) {
@@ -328,12 +299,8 @@ EfficientLocalSearchOutput travellingthiefsolver::packingwhiletravelling::effici
     }
 
     // Update output.
-    std::stringstream ss;
-    output.update_solution(
-            solution_builder.build(),
-            ss,
-            parameters.info);
+    algorithm_formatter.update_solution(solution_builder.build(), "");
 
-    output.algorithm_end(parameters.info);
+    algorithm_formatter.end();
     return output;
 }

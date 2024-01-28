@@ -13,7 +13,10 @@ class SolutionBuilder
 public:
 
     /** Constructor. */
-    SolutionBuilder(const Instance& instance);
+    SolutionBuilder() { }
+
+    /** Set the instance of the solution. */
+    SolutionBuilder& set_instance(const Instance& instance);
 
     /** Add cities. */
     void add_item(ItemId item_id);

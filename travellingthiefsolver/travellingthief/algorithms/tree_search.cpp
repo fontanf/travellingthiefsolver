@@ -1,5 +1,7 @@
 #include "travellingthiefsolver/travellingthief/algorithms/tree_search.hpp"
 
+#include "travellingthiefsolver/travellingthief/algorithm_formatter.hpp"
+
 #include "treesearchsolver/best_first_search.hpp"
 
 using namespace travellingthiefsolver::travellingthief;
@@ -75,18 +77,12 @@ public:
         CityStateId next_child_city_state_id = 0;
     };
 
-    struct Parameters
-    {
-    };
-
     BranchingScheme(
             const Instance& instance,
-            const std::vector<std::vector<travellingthiefsolver::packingwhiletravelling::CityState>>& city_states,
-            Parameters parameters):
+            const std::vector<std::vector<travellingthiefsolver::packingwhiletravelling::CityState>>& city_states):
         instance_(instance),
         distances_(instance.distances()),
         city_states_(city_states),
-        parameters_(parameters),
         closest_city_distances_(instance_.number_of_cities(), std::numeric_limits<Distance>::max())
     {
         for (CityId city_id = 0;
@@ -396,9 +392,6 @@ private:
     /** City states. */
     const std::vector<std::vector<travellingthiefsolver::packingwhiletravelling::CityState>>& city_states_;
 
-    /** Parameters. */
-    Parameters parameters_;
-
     double best_efficiency_ = 0;
 
     std::vector<Distance> closest_city_distances_;
@@ -410,27 +403,23 @@ private:
 
 const Output travellingthiefsolver::travellingthief::tree_search(
         const Instance& instance,
-        optimizationtools::Info info)
+        const Parameters& parameters)
 {
-    init_display(instance, info);
-    info.os()
-        << "Algorithm" << std::endl
-        << "---------" << std::endl
-        << "Tree search" << std::endl
-        << std::endl;
-
-    Output output(instance, info);
+    Output output(instance);
+    AlgorithmFormatter algorithm_formatter(parameters, output);
+    algorithm_formatter.start("Tree search");
+    algorithm_formatter.print_header();
 
     auto city_states = packingwhiletravelling::compute_city_states<Instance>(instance);
-    BranchingScheme::Parameters bs_parameters;
-    BranchingScheme branching_scheme(instance, city_states, bs_parameters);
-    treesearchsolver::BestFirstSearchOptionalParameters<BranchingScheme> bfs_parameters;
-    //bfs_parameters.info.set_verbosity_level(1);
-    bfs_parameters.info.set_time_limit(info.remaining_time());
+    BranchingScheme branching_scheme(instance, city_states);
+    treesearchsolver::BestFirstSearchParameters<BranchingScheme> bfs_parameters;
+    bfs_parameters.timer = parameters.timer;
+    bfs_parameters.verbosity_level = 0;
     bfs_parameters.new_solution_callback
-        = [&instance, &city_states, &info, &output](
-                const treesearchsolver::BestFirstSearchOutput<BranchingScheme>& bfs_output)
+        = [&instance, &city_states, &algorithm_formatter](
+                const treesearchsolver::Output<BranchingScheme>& ts_output)
         {
+            const auto& bfs_output = static_cast<const treesearchsolver::BestFirstSearchOutput<BranchingScheme>&>(ts_output);
             Solution solution(instance);
             auto node = bfs_output.solution_pool.best();
             std::vector<std::shared_ptr<BranchingScheme::Node>> ancestors;
@@ -450,15 +439,16 @@ const Output travellingthiefsolver::travellingthief::tree_search(
             }
             std::stringstream ss;
             ss << "node " << bfs_output.number_of_nodes;
-            output.update_solution(solution, ss, info);
+            algorithm_formatter.update_solution(solution, ss.str());
         };
     treesearchsolver::best_first_search(branching_scheme, bfs_parameters);
 
-    if (!info.needs_to_end()) {
-        std::stringstream ss;
-        ss << "tree search completed";
-        output.update_bound(output.solution.objective(), ss, info);
+    if (!parameters.timer.needs_to_end()) {
+        algorithm_formatter.update_bound(
+                output.solution.objective_value(),
+                "tree search completed");
     }
 
-    return output.algorithm_end(info);
+    algorithm_formatter.end();
+    return output;
 }

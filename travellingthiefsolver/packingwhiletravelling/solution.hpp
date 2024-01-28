@@ -2,7 +2,7 @@
 
 #include "travellingthiefsolver/packingwhiletravelling/instance.hpp"
 
-#include <string>
+#include "nlohmann/json.hpp"
 
 namespace travellingthiefsolver
 {
@@ -49,7 +49,7 @@ public:
     inline Profit renting_cost() const { return instance().renting_ratio() * travel_time_; }
 
     /** Get the objective value of the solution. */
-    inline Profit objective() const { return item_profit() - renting_cost(); }
+    inline Profit objective_value() const { return item_profit() - renting_cost(); }
 
     /**
      * Return 'true' iff the solution is feasible.
@@ -59,19 +59,21 @@ public:
      */
     bool feasible() const;
 
-    bool is_strictly_better_than(const Solution& solution) const;
-
     /*
      * Export.
      */
 
-    /** Print the instance. */
-    std::ostream& print(
-            std::ostream& os,
-            int verbose = 1) const;
-
     /** Write the solution to a file. */
-    void write(std::string certificate_path) const;
+    void write(
+            const std::string& certificate_path) const;
+
+    /** Export solution characteristics to a JSON structure. */
+    nlohmann::json to_json() const;
+
+    /** Print the instance. */
+    std::ostream& format(
+            std::ostream& os,
+            int verbosity_level = 1) const;
 
 private:
 
@@ -121,54 +123,5 @@ private:
 
 };
 
-////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////// Output ////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Output structure for a 'packingwhiletravelling' problem.
- */
-struct Output
-{
-    /** Constructor. */
-    Output(
-            const Instance& instance,
-            optimizationtools::Info& info);
-
-    /** Solution. */
-    Solution solution;
-
-    /** Bound. */
-    Profit bound = std::numeric_limits<Profit>::infinity();
-
-    /** Elapsed time. */
-    double time = -1;
-
-    /** Print current state. */
-    void print(
-            optimizationtools::Info& info,
-            const std::stringstream& s) const;
-
-    /** Update the solution. */
-    void update_solution(
-            const Solution& solution_new,
-            const std::stringstream& s,
-            optimizationtools::Info& info);
-
-    /** Update the bound. */
-    void update_bound(
-            Profit bound_new,
-            const std::stringstream& s,
-            optimizationtools::Info& info);
-
-    /** Print the algorithm statistics. */
-    virtual void print_statistics(
-            optimizationtools::Info& info) const { (void)info; }
-
-    /** Method to call at the end of the algorithm. */
-    Output& algorithm_end(optimizationtools::Info& info);
-};
-
 }
 }
-

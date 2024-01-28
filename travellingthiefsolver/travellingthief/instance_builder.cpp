@@ -2,6 +2,8 @@
 
 #include "travelingsalesmansolver/distances_builder.hpp"
 
+#include "optimizationtools/utils/utils.hpp"
+
 using namespace travellingthiefsolver::travellingthief;
 
 void InstanceBuilder::add_cities(CityId number_of_cities)
@@ -26,8 +28,8 @@ void InstanceBuilder::add_item(
     item.weight = weight;
     instance_.items_.push_back(item);
 
-    instance_.profit_sum_ += profit;
-    instance_.weight_sum_ += weight;
+    instance_.total_item_profit_ += profit;
+    instance_.total_item_weight_ += weight;
 }
 
 void InstanceBuilder::read(

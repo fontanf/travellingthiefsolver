@@ -1,14 +1,14 @@
 #include "travellingthiefsolver/travellingwhilepacking/instance.hpp"
 
-#include "optimizationtools/utils/utils.hpp"
+#include <iomanip>
 
 using namespace travellingthiefsolver::travellingwhilepacking;
 
-std::ostream& Instance::print(
+std::ostream& Instance::format(
         std::ostream& os,
-        int verbose) const
+        int verbosity_level) const
 {
-    if (verbose >= 1) {
+    if (verbosity_level >= 1) {
         os
             << "Number of cities:  " << number_of_cities() << std::endl
             << "Minimum speed:     " << speed_min_ << std::endl
@@ -19,7 +19,7 @@ std::ostream& Instance::print(
             ;
     }
 
-    if (verbose >= 2) {
+    if (verbosity_level >= 2) {
         os << std::endl
             << std::setw(12) << "City"
             << std::setw(12) << "Weight"
@@ -38,7 +38,7 @@ std::ostream& Instance::print(
         }
     }
 
-    if (verbose >= 3) {
+    if (verbosity_level >= 3) {
         os << std::endl
             << std::setw(12) << "City 1"
             << std::setw(12) << "City 2"
@@ -67,7 +67,7 @@ std::ostream& Instance::print(
 }
 
 void Instance::write(
-        std::string instance_path) const
+        const std::string& instance_path) const
 {
     if (instance_path.empty())
         return;
@@ -89,23 +89,4 @@ void Instance::write(
     // TODO
     distances().write(file);
     file << "EOF" << std::endl;
-}
-
-void travellingthiefsolver::travellingwhilepacking::init_display(
-        const Instance& instance,
-        optimizationtools::Info& info)
-{
-    info.os()
-        << "=====================================" << std::endl
-        << "        TravellingThiefSolver        " << std::endl
-        << "=====================================" << std::endl
-        << std::endl
-        << "Problem" << std::endl
-        << "-------" << std::endl
-        << "Travelling while packing problem" << std::endl
-        << std::endl
-        << "Instance" << std::endl
-        << "--------" << std::endl;
-    instance.print(info.os(), info.verbosity_level());
-    info.os() << std::endl;
 }

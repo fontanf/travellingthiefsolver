@@ -1,19 +1,14 @@
 #pragma once
 
-#include "travellingthiefsolver/packingwhiletravelling/solution.hpp"
+#include "travellingthiefsolver/packingwhiletravelling/algorithm.hpp"
 
 namespace travellingthiefsolver
 {
 namespace packingwhiletravelling
 {
 
-struct DynamicProgrammingOptionalParameters
+struct DynamicProgrammingParameters: Parameters
 {
-    /** Reduction parameters. */
-    ReductionParameters reduction_parameters;
-
-    /** Info structure. */
-    optimizationtools::Info info = optimizationtools::Info();
 };
 
 /**
@@ -26,7 +21,7 @@ struct DynamicProgrammingOptionalParameters
  */
 Output dynamic_programming(
         const Instance& instance,
-        DynamicProgrammingOptionalParameters parameters = {});
+        const DynamicProgrammingParameters& parameters = {});
 
 }
 }

@@ -40,6 +40,7 @@ std::vector<Solution> solve_tsp_lkh(
         const Instance& instance,
         const travelingsalesmansolver::Instance& tsp_instance,
         std::mt19937_64& generator,
+        const Parameters& parameters,
         std::string& lkh_candidate_file_content);
 
 /*

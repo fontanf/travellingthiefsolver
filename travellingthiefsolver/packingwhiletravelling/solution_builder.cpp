@@ -1,11 +1,14 @@
 #include "travellingthiefsolver/packingwhiletravelling/solution_builder.hpp"
 
+#include <fstream>
+
 using namespace travellingthiefsolver::packingwhiletravelling;
 
-SolutionBuilder::SolutionBuilder(const Instance& instance)
+SolutionBuilder& SolutionBuilder::set_instance(const Instance& instance)
 {
     solution_.instance_ = &instance;
     solution_.items_is_selected_ = std::vector<uint8_t>(instance.number_of_items(), 0);
+    return *this;
 }
 
 void SolutionBuilder::add_item(ItemId item_id)

@@ -1,13 +1,13 @@
 #pragma once
 
-#include "travellingthiefsolver/packingwhiletravelling/solution.hpp"
+#include "travellingthiefsolver/packingwhiletravelling/algorithm.hpp"
 
 namespace travellingthiefsolver
 {
 namespace packingwhiletravelling
 {
 
-struct GreedyOptionalParameters
+struct GreedyParameters: Parameters
 {
     /**
      * Scoring function.
@@ -17,15 +17,11 @@ struct GreedyOptionalParameters
      * - 2: scoring function from polyakovskiy2014 divided by weight
      */
     int scoring_function = 0;
-
-    /** Reduction parameters. */
-    ReductionParameters reduction_parameters;
-
-    /** Info structure. */
-    optimizationtools::Info info = optimizationtools::Info();
 };
 
-Output greedy(const Instance& instance, GreedyOptionalParameters parameters = {});
+Output greedy(
+        const Instance& instance,
+        const GreedyParameters& parameters = {});
 
 }
 }

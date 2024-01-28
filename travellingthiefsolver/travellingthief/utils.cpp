@@ -2,7 +2,6 @@
 
 #include "travellingthiefsolver/travellingwhilepacking/instance_builder.hpp"
 
-#include "travelingsalesmansolver/distances_builder.hpp"
 #include "travelingsalesmansolver/algorithms/lkh.hpp"
 
 using namespace travellingthiefsolver::travellingthief;
@@ -180,10 +179,13 @@ std::vector<Solution> travellingthiefsolver::travellingthief::solve_tsp_lkh(
         const Instance& instance,
         const travelingsalesmansolver::Instance& tsp_instance,
         std::mt19937_64& generator,
+        const Parameters& parameters,
         std::string& lkh_candidate_file_content)
 {
     std::uniform_int_distribution<Counter> d_seed(1, 1e8);
-    travelingsalesmansolver::LkhOptionalParameters tsp_parameters;
+    travelingsalesmansolver::LkhParameters tsp_parameters;
+    tsp_parameters.timer = parameters.timer;
+    tsp_parameters.verbosity_level = 0;
     if (instance.number_of_cities() < 1e4) {
         tsp_parameters.candidate_set_type = "DELAUNAY";
     } else {
@@ -204,5 +206,4 @@ std::vector<Solution> travellingthiefsolver::travellingthief::solve_tsp_lkh(
     return {
         retrieve_solution(instance, tsp_output.solution),
         retrieve_solution_2(instance, tsp_output.solution)};
-
 }

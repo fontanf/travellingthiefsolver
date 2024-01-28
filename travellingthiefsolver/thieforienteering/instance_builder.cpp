@@ -2,6 +2,8 @@
 
 #include "travelingsalesmansolver/distances_builder.hpp"
 
+#include "optimizationtools/utils/utils.hpp"
+
 using namespace travellingthiefsolver::thieforienteering;
 
 void InstanceBuilder::add_cities(CityId number_of_cities)

@@ -1,11 +1,8 @@
 #pragma once
 
-#include "optimizationtools/utils/info.hpp"
-#include "optimizationtools/utils/utils.hpp"
-
 #include "travelingsalesmansolver/distances.hpp"
 
-#include <random>
+#include <memory>
 
 namespace travellingthiefsolver
 {
@@ -78,12 +75,13 @@ public:
      */
 
     /** Print the instance. */
-    std::ostream& print(
+    std::ostream& format(
             std::ostream& os,
-            int verbose = 1) const;
+            int verbosity_level = 1) const;
 
     /** Write the instance to a file. */
-    void write(std::string instance_path) const;
+    void write(
+            const std::string& instance_path) const;
 
 private:
 
@@ -123,10 +121,6 @@ private:
 
 };
 
-void init_display(
-        const Instance& instance,
-        optimizationtools::Info& info);
-
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// Inlined methods ////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -147,4 +141,3 @@ inline Time Instance::duration(
 
 }
 }
-
