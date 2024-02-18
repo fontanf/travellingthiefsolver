@@ -1,4 +1,4 @@
-# Travelling thief solver
+# TravellingThiefSolver
 
 A solver for various problems related to the travelling thief problem:
 * The travelling thief problem
