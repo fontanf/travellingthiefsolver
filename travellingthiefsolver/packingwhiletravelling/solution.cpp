@@ -1,6 +1,6 @@
 #include "travellingthiefsolver/packingwhiletravelling/solution.hpp"
 
-#include "optimizationtools//utils//utils.hpp"
+#include "optimizationtools/utils/utils.hpp"
 
 #include <iomanip>
 #include <fstream>

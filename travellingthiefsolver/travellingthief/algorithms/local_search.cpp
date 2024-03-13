@@ -144,14 +144,14 @@ private:
 
 const Output travellingthiefsolver::travellingthief::local_search(
         const Instance& instance,
-        const Parameters& parameters)
+        const LocalSearchParameters& parameters)
 {
     Output output(instance);
     AlgorithmFormatter algorithm_formatter(parameters, output);
     algorithm_formatter.start("Local search");
     algorithm_formatter.print_header();
 
-    instance.distances().compute_distances();
+    //instance.distances().compute_distances();
     auto city_states = packingwhiletravelling::compute_city_states<Instance>(instance);
 
     //for (CityId city_id = 0; city_id < instance.number_of_cities(); ++city_id) {
@@ -196,12 +196,12 @@ const Output travellingthiefsolver::travellingthief::local_search(
     best_first_local_search(local_scheme, bfls_parameters);
     */
 
-    localsearchsolver::GeneticLocalSearchParameters<LocalScheme> gls_parameters;
-    gls_parameters.verbosity_level = 0;
-    gls_parameters.timer = parameters.timer;
-    //gls_parameters.maximum_number_of_iterations = 100;
-    gls_parameters.number_of_threads = 6;
-    gls_parameters.new_solution_callback
+    localsearchsolver::GeneticLocalSearchParameters<LocalScheme> lssgls_parameters;
+    lssgls_parameters.verbosity_level = 0;
+    lssgls_parameters.timer = parameters.timer;
+    lssgls_parameters.maximum_number_of_iterations = parameters.maximum_number_of_iterations;
+    lssgls_parameters.number_of_threads = parameters.number_of_threads;
+    lssgls_parameters.new_solution_callback
         = [&instance, &city_states, &algorithm_formatter](
                 const localsearchsolver::Output<LocalScheme>& ls_output)
         {
@@ -215,7 +215,7 @@ const Output travellingthiefsolver::travellingthief::local_search(
             }
             algorithm_formatter.update_solution(solution, "");
         };
-    localsearchsolver::genetic_local_search(local_scheme, gls_parameters);
+    localsearchsolver::genetic_local_search(local_scheme, lssgls_parameters);
 
     algorithm_formatter.end();
     return output;

@@ -7,6 +7,38 @@ namespace travellingthiefsolver
 namespace travellingthief
 {
 
+struct LocalSearchParameters: Parameters
+{
+    /** Maximum number of iterations. */
+    Counter maximum_number_of_iterations = -1;
+
+    /** Number of threads. */
+    Counter number_of_threads = 1;
+
+
+    virtual int format_width() const override { return 31; }
+
+    virtual void format(std::ostream& os) const override
+    {
+        Parameters::format(os);
+        int width = format_width();
+        os
+            << std::setw(width) << std::left << "Maximum number of iterations: " << maximum_number_of_iterations << std::endl
+            << std::setw(width) << std::left << "Number of threads: " << number_of_threads << std::endl
+            ;
+    }
+
+    virtual nlohmann::json to_json() const override
+    {
+        nlohmann::json json = Parameters::to_json();
+        json.merge_patch({
+                {"MaximumNumberOfIterations", maximum_number_of_iterations},
+                {"NumberOfThreads", number_of_threads},
+                });
+        return json;
+    }
+};
+
 /**
  * Local search algorithm for the travelling thief problem.
  *
@@ -18,7 +50,7 @@ namespace travellingthief
  */
 const Output local_search(
         const Instance& instance,
-        const Parameters& parameters = {});
+        const LocalSearchParameters& parameters = {});
 
 }
 }

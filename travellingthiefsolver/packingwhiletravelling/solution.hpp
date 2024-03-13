@@ -18,12 +18,6 @@ class Solution
 public:
 
     /*
-     * Constructors and destructor.
-     */
-
-    void update(const Solution& solution);
-
-    /*
      * Getters
      */
 
@@ -60,7 +54,7 @@ public:
     bool feasible() const;
 
     /*
-     * Export.
+     * Export
      */
 
     /** Write the solution to a file. */
@@ -94,7 +88,7 @@ private:
     std::vector<ItemId> item_ids_;
 
     /**
-     * Array indexed by items indicating whether of not they are selected in
+     * Array indexed by items indicating whether or not they are selected in
      * the solution.
      */
     std::vector<uint8_t> items_is_selected_;

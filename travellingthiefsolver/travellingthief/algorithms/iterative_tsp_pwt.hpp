@@ -40,4 +40,3 @@ const IterativeTspPwtOutput iterative_tsp_pwt(
 
 }
 }
-
