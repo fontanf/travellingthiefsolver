@@ -41,22 +41,28 @@ void read_args(
     }
 }
 
+template <typename Distances>
 Output run(
+        const Distances& distances,
         const Instance& instance,
         const po::variables_map& vm)
 {
     std::mt19937_64 generator(vm["seed"].as<Seed>());
 
     Solution solution(instance);
-    if (vm.count("initial-solution"))
-        solution = Solution(instance, vm["initial-solution"].as<std::string>());
+    if (vm.count("initial-solution")) {
+        solution = Solution(
+                distances,
+                instance,
+                vm["initial-solution"].as<std::string>());
+    }
 
     // Run algorithm.
     std::string algorithm = vm["algorithm"].as<std::string>();
     if (algorithm == "tree-search") {
         Parameters parameters;
         read_args(parameters, vm);
-        return tree_search(instance, parameters);
+        return tree_search(distances, instance, parameters);
     } else if (algorithm == "local-search") {
         LocalSearchParameters parameters;
         if (vm.count("maximum-number-of-iterations"))
@@ -64,23 +70,23 @@ Output run(
         if (vm.count("number-of-threads"))
             parameters.number_of_threads = vm["number-of-threads"].as<int>();
         read_args(parameters, vm);
-        return local_search(instance, parameters);
+        return local_search(distances, instance, parameters);
     } else if (algorithm == "efficient-local-search") {
         EfficientLocalSearchParameters parameters;
         read_args(parameters, vm);
-        return efficient_local_search(instance, generator, parameters);
+        return efficient_local_search(distances, instance, generator, parameters);
     } else if (algorithm == "efficient-genetic-local-search") {
         EfficientLocalSearchParameters parameters;
         read_args(parameters, vm);
-        return efficient_genetic_local_search(instance, generator, parameters);
+        return efficient_genetic_local_search(distances, instance, generator, parameters);
     } else if (algorithm == "iterative-tsp-pwt") {
         IterativeTspPwtParameters parameters;
         read_args(parameters, vm);
-        return iterative_tsp_pwt(instance, generator, parameters);
+        return iterative_tsp_pwt(distances, instance, generator, parameters);
     } else if (algorithm == "iterative-tsp-pwt-ttp") {
         IterativeTspPwtTtpParameters parameters;
         read_args(parameters, vm);
-        return iterative_tsp_pwt_ttp(instance, generator, parameters);
+        return iterative_tsp_pwt_ttp(distances, instance, generator, parameters);
 
     } else {
         throw std::invalid_argument(
@@ -131,8 +137,18 @@ int main(int argc, char *argv[])
             vm["format"].as<std::string>());
     const Instance instance = instance_builder.build();
 
+    if (instance.number_of_cities() <= 16000) {
+        instance.distances().compute_distances_explicit();
+    } else if (instance.number_of_cities() <= 40000) {
+        instance.distances().compute_distances_explicit_triangle();
+    }
+
     // Run.
-    Output output = run(instance, vm);
+    Output output = FUNCTION_WITH_DISTANCES(
+            run,
+            instance.distances(),
+            instance,
+            vm);
 
     // Write outputs.
     std::string certificate_path = vm["certificate"].as<std::string>();

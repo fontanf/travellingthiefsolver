@@ -5,6 +5,27 @@
 
 using namespace travellingthiefsolver::travellingthief;
 
+template <typename Distances>
+void run(
+        const Distances& distances,
+        const Instance& instance,
+        const std::string& certificate_path,
+        const std::string& output_path)
+{
+    Solution solution(
+            distances,
+            instance,
+            certificate_path);
+
+    // Create PWT instance and write it.
+    auto pwt_instance = create_pwt_instance(distances, instance, solution);
+    pwt_instance.write(output_path + ".pwt");
+
+    // Create TWP instance and write it.
+    auto twp_instance = create_twp_instance(instance, solution);
+    twp_instance.write(output_path + ".twp");
+}
+
 int main(int argc, char *argv[])
 {
     namespace po = boost::program_options;
@@ -43,16 +64,12 @@ int main(int argc, char *argv[])
     const Instance instance = instance_builder.build();
 
     // Read solution.
-    Solution solution(instance, certificate_path);
-
-    // Create PWT instance and write it.
-    auto pwt_instance = create_pwt_instance(instance, solution);
-    pwt_instance.write(output_path + ".pwt");
-
-    // Create TWP instance and write it.
-    auto twp_instance = create_twp_instance(instance, solution);
-    twp_instance.write(output_path + ".twp");
+    FUNCTION_WITH_DISTANCES(
+            run,
+            instance.distances(),
+            instance,
+            certificate_path,
+            output_path);
 
     return 0;
 }
-

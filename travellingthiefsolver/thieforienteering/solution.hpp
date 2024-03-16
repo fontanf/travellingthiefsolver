@@ -44,10 +44,15 @@ public:
      */
 
     /** Create an empty solution. */
-    Solution(const Instance& instance);
+    template <typename Distances>
+    Solution(
+            const Distances& distances,
+            const Instance& instance);
 
     /** Create a solution from a certificate file. */
+    template <typename Distances>
     Solution(
+            const Distances& distances,
             const Instance& instance,
             std::string certificate_path);
 
@@ -98,14 +103,20 @@ public:
      */
 
     /** Append a city at the end of the solution. */
-    void add_city(CityId city_id);
+    template <typename Distances>
+    void add_city(
+            const Distances& distances,
+            CityId city_id);
 
     /**
      * Add an item to the solution.
      *
      * The item must be located in the last city of the solution.
      */
-    void add_item(ItemId item_id);
+    template <typename Distances>
+    void add_item(
+            const Distances& distances,
+            ItemId item_id);
 
     /*
      * Export.
@@ -204,7 +215,11 @@ inline optimizationtools::ObjectiveDirection objective_direction()
 struct Output: optimizationtools::Output
 {
     /** Constructor. */
-    Output(const Instance& instance): solution(instance) { }
+    template <typename Distances>
+    Output(
+            const Distances& distances,
+            const Instance& instance):
+        solution(distances, instance) { }
 
 
     /** Solution. */
@@ -291,6 +306,133 @@ struct Parameters: optimizationtools::Parameters
         optimizationtools::Parameters::format(os);
     }
 };
+
+template <typename Distances>
+Solution::Solution(
+        const Distances& distances,
+        const Instance& instance):
+    instance_(&instance),
+    cities_(instance.number_of_cities()),
+    items_is_selected_(instance.number_of_items(), false)
+{
+    // Add initial city.
+    city_ids_.push_back(0);
+    cities_[0].in = true;
+    cities_[instance.number_of_cities() - 1].in = true;
+    distance_ = distance_cur_ + distances.distance(
+            0,
+            instance_->number_of_cities() - 1);
+    travel_time_ = travel_time_cur_ + instance.duration(
+            distances,
+            0,
+            instance.number_of_cities() - 1,
+            item_weight_);
+}
+
+template <typename Distances>
+Solution::Solution(
+        const Distances& distances,
+        const Instance& instance,
+        std::string certificate_path):
+    Solution(distances, instance)
+{
+    if (certificate_path.empty())
+        return;
+    std::ifstream file(certificate_path);
+    if (!file.good()) {
+        throw std::runtime_error(
+                "Unable to open file \"" + certificate_path + "\".");
+    }
+
+    char sep;
+    file >> sep;
+
+    std::vector<CityId> city_ids;
+    CityId city_id = -1;
+    for (CityId city_pos = 0;
+            city_pos < instance.number_of_cities();
+            ++city_pos) {
+        file >> city_id >> sep;
+        city_id--;
+        city_ids.push_back(city_id);
+    }
+
+    ItemId item_id;
+    CityId city_pos = 0;
+    file >> sep;
+    for (;;) {
+        file >> item_id >> sep;
+        if (file.eof())
+            break;
+        item_id--;
+        const Item& item = instance.item(item_id);
+        while (item.city_id != city_ids[city_pos]) {
+            city_pos++;
+            add_city(distances, city_ids[city_pos]);
+        }
+        add_item(distances, item_id);
+    }
+}
+
+template <typename Distances>
+void Solution::add_city(
+        const Distances& distances,
+        CityId city_id)
+{
+    // Check that the city has not already been visited.
+    if (cities_[city_id].in) {
+        throw std::runtime_error(
+                "thieforienteering::Solution::add_city(CityId)."
+                "City " + std::to_string(city_id) + " is already in the solution.");
+    }
+
+    CityId city_id_prev = city_ids_.back();
+    city_ids_.push_back(city_id);
+    cities_[city_id].in = true;
+    distance_cur_ += distances.distance(city_id_prev, city_id);
+    distance_ = distance_cur_ + distances.distance(
+            city_id,
+            instance_->number_of_cities() - 1);
+    travel_time_cur_ += instance().duration(distances, city_id_prev, city_id, item_weight_);
+    travel_time_ = travel_time_cur_ + instance().duration(
+            distances,
+            city_id,
+            instance().number_of_cities() - 1,
+            item_weight_);
+}
+
+template <typename Distances>
+void Solution::add_item(
+        const Distances& distances,
+        ItemId item_id)
+{
+    const Item& item = instance().item(item_id);
+
+    // Check that the item is available at the last visited city.
+    if (item.city_id != city_ids_.back()) {
+        throw std::runtime_error("");  // TODO
+    }
+
+    // Check that the item has not already been selected.
+    if (items_is_selected_[item_id]) {
+        throw std::runtime_error("");  // TODO
+    }
+
+    items_is_selected_[item_id] = 1;
+    item_ids_.push_back(item_id);
+    item_profit_ += item.profit;
+    item_weight_ += item.weight;
+    CityId city_id = city_ids_.back();
+    travel_time_ = travel_time_cur_ + instance().duration(
+            distances,
+            city_id,
+            instance().number_of_cities() - 1,
+            item_weight_);
+
+    cities_[city_id].number_of_items++;
+    cities_[city_id].profit += item.profit;
+    cities_[city_id].weight += item.weight;
+}
 
 }
 }

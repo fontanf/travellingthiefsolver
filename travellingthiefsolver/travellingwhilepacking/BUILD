@@ -16,7 +16,7 @@ cc_library(
         ],
         deps = [
                 "@optimizationtools//optimizationtools/containers:containers",
-                "@travelingsalesmansolver//travelingsalesmansolver:distances",
+                "@travelingsalesmansolver//travelingsalesmansolver/distances:distances",
         ],
         visibility = ["//visibility:public"],
 )

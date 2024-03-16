@@ -1,6 +1,6 @@
 #pragma once
 
-#include "travelingsalesmansolver/distances.hpp"
+#include "travelingsalesmansolver/distances/distances.hpp"
 
 #include <memory>
 
@@ -50,7 +50,9 @@ public:
     inline const City& city(CityId city_id) const { return cities_[city_id]; }
 
     /** Get the duration between two cities. */
+    template <typename Distances>
     inline Time duration(
+            const Distances& distances,
             CityId city_id_1,
             CityId city_id_2,
             Weight weight) const;
@@ -125,7 +127,9 @@ private:
 /////////////////////////////// Inlined methods ////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+template <typename Distances>
 inline Time Instance::duration(
+        const Distances& distances,
         CityId city_id_1,
         CityId city_id_2,
         Weight weight) const
@@ -136,7 +140,7 @@ inline Time Instance::duration(
     //            + "; capacity: " + std::to_string(capacity()) + ".");
     //}
     double speed = speed_max_ - (double)(weight * (speed_max_ - speed_min_)) / capacity();
-    return (double)distances().distance(city_id_1, city_id_2) / speed;
+    return (double)distances.distance(city_id_1, city_id_2) / speed;
 }
 
 }

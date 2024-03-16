@@ -2,7 +2,7 @@
 
 #include "travellingthiefsolver/packingwhiletravelling/utils.hpp"
 
-#include "travelingsalesmansolver/distances.hpp"
+#include "travelingsalesmansolver/distances/distances.hpp"
 
 #include <memory>
 
@@ -82,7 +82,9 @@ public:
             Weight weight) const;
 
     /** Get the duration between two cities. */
+    template <typename Distances>
     inline Time duration(
+            const Distances& distances,
             CityId city_id_1,
             CityId city_id_2,
             Weight weight) const;
@@ -182,14 +184,15 @@ inline double Instance::speed(
     return speed_max_ - (double)(weight * (speed_max_ - speed_min_)) / capacity();
 }
 
+template <typename Distances>
 inline Time Instance::duration(
+        const Distances& distances,
         CityId city_id_1,
         CityId city_id_2,
         Weight weight) const
 {
-    return (double)distances().distance(city_id_1, city_id_2) / speed(weight);
+    return (double)distances.distance(city_id_1, city_id_2) / speed(weight);
 }
 
 }
 }
-

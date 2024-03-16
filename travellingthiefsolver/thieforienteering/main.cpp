@@ -38,26 +38,28 @@ void read_args(
     }
 }
 
+template <typename Distances>
 Output run(
+        const Distances& distances,
         const Instance& instance,
         const po::variables_map& vm)
 {
     std::mt19937_64 generator(vm["seed"].as<Seed>());
 
-    Solution solution(instance);
+    Solution solution(distances, instance);
     if (vm.count("initial-solution"))
-        solution = Solution(instance, vm["initial-solution"].as<std::string>());
+        solution = Solution(distances, instance, vm["initial-solution"].as<std::string>());
 
     // Run algorithm.
     std::string algorithm = vm["algorithm"].as<std::string>();
     if (algorithm == "local-search") {
         Parameters parameters;
         read_args(parameters, vm);
-        return local_search(instance, parameters);
+        return local_search(distances, instance, parameters);
     } if (algorithm == "tree-search") {
         Parameters parameters;
         read_args(parameters, vm);
-        return tree_search(instance, parameters);
+        return tree_search(distances, instance, parameters);
 
     } else {
         throw std::invalid_argument(
@@ -108,7 +110,11 @@ int main(int argc, char *argv[])
     const Instance instance = instance_builder.build();
 
     // Run.
-    Output output = run(instance, vm);
+    Output output = FUNCTION_WITH_DISTANCES(
+            run,
+            instance.distances(),
+            instance,
+            vm);
 
     // Write outputs.
     std::string certificate_path = vm["certificate"].as<std::string>();

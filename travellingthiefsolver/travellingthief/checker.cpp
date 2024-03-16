@@ -1,9 +1,21 @@
 #include "travellingthiefsolver/travellingthief/instance_builder.hpp"
-#include "travellingthiefsolver/travellingthief/utils.hpp"
+#include "travellingthiefsolver/travellingthief/solution.hpp"
 
 #include <boost/program_options.hpp>
 
 using namespace travellingthiefsolver::travellingthief;
+
+template <typename Distances>
+Solution build_solution(
+        const Distances& distances,
+        const Instance& instance,
+        const std::string& certificate_path)
+{
+    return Solution(
+            distances,
+            instance,
+            certificate_path);
+}
 
 int main(int argc, char *argv[])
 {
@@ -41,7 +53,11 @@ int main(int argc, char *argv[])
     const Instance instance = instance_builder.build();
 
     // Read solution.
-    Solution solution(instance, certificate_path);
+    Solution solution = FUNCTION_WITH_DISTANCES(
+            build_solution,
+            instance.distances(),
+            instance,
+            certificate_path);
 
     std::cout
         << "Solution" << std::endl

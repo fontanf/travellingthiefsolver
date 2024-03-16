@@ -21,7 +21,7 @@ cc_library(
                 "//travellingthiefsolver/travellingwhilepacking:travellingwhilepacking",
                 "@optimizationtools//optimizationtools/utils:utils",
                 "@optimizationtools//optimizationtools/containers:containers",
-                "@travelingsalesmansolver//travelingsalesmansolver:distances",
+                "@travelingsalesmansolver//travelingsalesmansolver/distances:distances",
                 "@travelingsalesmansolver//travelingsalesmansolver:travelingsalesmansolver",
                 "@travelingsalesmansolver//travelingsalesmansolver/algorithms:lkh",
         ],

@@ -74,7 +74,10 @@ public:
      */
 
     /** Append a city at the end of the solution. */
-    void add_city(CityId city_id);
+    template <typename Distances>
+    void add_city(
+            const Distances& distances,
+            CityId city_id);
 
     /*
      * Export
@@ -246,6 +249,25 @@ struct Parameters: optimizationtools::Parameters
     }
 };
 
-}
+template <typename Distances>
+void Solution::add_city(
+        const Distances& distances,
+        CityId city_id)
+{
+    // Check that the city has not already been visited.
+    if (cities_is_visited_[city_id]) {
+        throw std::runtime_error("");  // TODO
+    }
+
+    CityId city_id_prev = city_ids_.back();
+    city_ids_.push_back(city_id);
+    cities_is_visited_[city_id] = true;
+    distance_cur_ += distances.distance(city_id_prev, city_id);
+    distance_ = distance_cur_ + distances.distance(city_id, 0);
+    travel_time_cur_ += instance().duration(distances, city_id_prev, city_id, item_weight_);
+    item_weight_ += instance().city(city_id).weight;
+    travel_time_ = travel_time_cur_ + instance().duration(distances, city_id, 0, item_weight_);
 }
 
+}
+}

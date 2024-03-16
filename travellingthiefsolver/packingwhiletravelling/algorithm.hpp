@@ -73,7 +73,7 @@ struct Output: optimizationtools::Output
             {"Bound", bound},
             {"AbsoluteOptimalityGap", absolute_optimality_gap()},
             {"RelativeOptimalityGap", relative_optimality_gap()},
-            {"Time", time}
+            {"Time", time},
         };
     }
 
@@ -110,7 +110,8 @@ struct Parameters: optimizationtools::Parameters
             {"Reduction",
                 {"Enable", reduction_parameters.reduce},
                 {"MaximumNumberOfRounds", reduction_parameters.maximum_number_of_rounds},
-                {"ExpensiveReduction", reduction_parameters.enable_expensive_reduction}});
+                {"ExpensiveReduction", reduction_parameters.enable_expensive_reduction},
+                });
         return json;
     }
 

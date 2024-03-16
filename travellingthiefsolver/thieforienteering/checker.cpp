@@ -5,6 +5,18 @@
 
 using namespace travellingthiefsolver::thieforienteering;
 
+template <typename Distances>
+Solution build_solution(
+        const Distances& distances,
+        const Instance& instance,
+        const std::string& certificate_path)
+{
+    return Solution(
+            distances,
+            instance,
+            certificate_path);
+}
+
 int main(int argc, char *argv[])
 {
     namespace po = boost::program_options;
@@ -41,7 +53,11 @@ int main(int argc, char *argv[])
     const Instance instance = instance_builder.build();
 
     // Read solution.
-    Solution solution(instance, certificate_path);
+    Solution solution = FUNCTION_WITH_DISTANCES(
+            build_solution,
+            instance.distances(),
+            instance,
+            certificate_path);
 
     std::cout
         << "Solution" << std::endl
@@ -51,4 +67,3 @@ int main(int argc, char *argv[])
 
     return 0;
 }
-

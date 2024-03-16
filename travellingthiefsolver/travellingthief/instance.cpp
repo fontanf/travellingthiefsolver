@@ -69,30 +69,7 @@ std::ostream& Instance::format(
         }
     }
 
-    if (verbosity_level >= 3) {
-        os << std::endl
-            << std::setw(12) << "City 1"
-            << std::setw(12) << "City 2"
-            << std::setw(12) << "Distance"
-            << std::endl
-            << std::setw(12) << "------"
-            << std::setw(12) << "------"
-            << std::setw(12) << "--------"
-            << std::endl;
-        for (CityId city_id_1 = 0;
-                city_id_1 < number_of_cities();
-                ++city_id_1) {
-            for (CityId city_id_2 = city_id_1 + 1;
-                    city_id_2 < number_of_cities();
-                    ++city_id_2) {
-                os
-                    << std::setw(12) << city_id_1
-                    << std::setw(12) << city_id_2
-                    << std::setw(12) << distances().distance(city_id_1, city_id_2)
-                    << std::endl;
-            }
-        }
-    }
+    distances_->format(os, verbosity_level);
 
     return os;
 }

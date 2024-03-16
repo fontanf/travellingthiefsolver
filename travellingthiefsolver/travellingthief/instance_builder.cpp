@@ -1,6 +1,6 @@
 #include "travellingthiefsolver/travellingthief/instance_builder.hpp"
 
-#include "travelingsalesmansolver/distances_builder.hpp"
+#include "travelingsalesmansolver/distances/distances_builder.hpp"
 
 #include "optimizationtools/utils/utils.hpp"
 
@@ -72,7 +72,7 @@ void InstanceBuilder::read_polyakovskiy2014(std::ifstream& file)
         } else if (tmp.rfind("DIMENSION", 0) == 0) {
             CityId number_of_cities = std::stol(line.back());
             add_cities(number_of_cities);
-            distances_builder.add_vertices(number_of_cities);
+            distances_builder.set_number_of_vertices(number_of_cities);
         } else if (tmp.rfind("NUMBER OF ITEMS", 0) == 0) {
             number_of_items = std::stol(line.back());
         } else if (tmp.rfind("CAPACITY OF KNAPSACK", 0) == 0) {

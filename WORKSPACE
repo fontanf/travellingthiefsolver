@@ -45,13 +45,13 @@ local_repository(
 git_repository(
     name = "travelingsalesmansolver",
     remote = "https://github.com/fontanf/travelingsalesmansolver.git",
-    commit = "40466dec8ec6ea2858d93ab16ca7678f3e81f8f5",
+    commit = "004086c1a544efea380ce5d757528eee23a73969",
 )
 
 local_repository(
     name = "travelingsalesmansolver_",
-    #path = "/home/florian/Dev/travelingsalesmansolver/",
-    path = "/mnt/d//Dev/fontanf/travelingsalesmansolver/",
+    path = "/home/florian/Dev/travelingsalesmansolver/",
+    #path = "/mnt/d//Dev/fontanf/travelingsalesmansolver/",
 )
 
 git_repository(
