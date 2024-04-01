@@ -67,7 +67,7 @@ bazel build -- //...
 Examples:
 
 ```shell
-./bazel-bin/travellingthiefsolver/travellingthief/main -v 1 -i "data/travellingthief/gecco2023/fnl4461_n4460_bounded-strongly-corr_01.ttp" -a "iterative-tsp-pwt-ttp" -t 600
+./bazel-bin/travellingthiefsolver/travelling_thief/main -v 1 -i "data/travelling_thief/gecco2023/fnl4461_n4460_bounded-strongly-corr_01.ttp" -a "iterative-tsp-pwt-ttp" -t 600
 ```
 ```
 =====================================
