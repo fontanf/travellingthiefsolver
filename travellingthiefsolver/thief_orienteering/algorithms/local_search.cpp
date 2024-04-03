@@ -4,7 +4,7 @@ using namespace travellingthiefsolver::thief_orienteering;
 
 const Output travellingthiefsolver::thief_orienteering::local_search(
         const Instance& instance,
-        const Parameters& parameters)
+        const LocalSearchParameters& parameters)
 {
     return FUNCTION_WITH_DISTANCES(
             local_search,

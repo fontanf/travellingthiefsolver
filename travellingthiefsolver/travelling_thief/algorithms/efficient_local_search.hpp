@@ -2612,11 +2612,14 @@ const EfficientLocalSearchOutput efficient_genetic_local_search(
     ls_parameters.number_of_threads = 1;
     ls_parameters.new_solution_callback
         = [&distances, &algorithm_formatter](
-                const localsearchsolver::Output<EfficientLocalScheme<Distances>>& ls_output)
+                const localsearchsolver::Output<EfficientLocalScheme<Distances>>& lss_output)
         {
+            const auto& lssgls_output = static_cast<const localsearchsolver::GeneticLocalSearchOutput<EfficientLocalScheme<Distances>>&>(lss_output);
+            std::stringstream ss;
+            ss << "iteration " << lssgls_output.number_of_iterations;
             algorithm_formatter.update_solution(
-                    ls_output.solution_pool.best().to_solution(distances),
-                    "");
+                    lss_output.solution_pool.best().to_solution(distances),
+                    ss.str());
         };
     localsearchsolver::genetic_local_search(local_scheme, ls_parameters);
 

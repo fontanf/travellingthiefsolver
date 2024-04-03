@@ -53,7 +53,11 @@ Output run(
     // Run algorithm.
     std::string algorithm = vm["algorithm"].as<std::string>();
     if (algorithm == "local-search") {
-        Parameters parameters;
+        LocalSearchParameters parameters;
+        if (vm.count("maximum-number-of-nodes"))
+            parameters.maximum_number_of_nodes = vm["maximum-number-of-nodes"].as<int>();
+        if (vm.count("number-of-threads"))
+            parameters.number_of_threads = vm["number-of-threads"].as<int>();
         read_args(parameters, vm);
         return local_search(distances, instance, parameters);
     } if (algorithm == "tree-search") {
@@ -87,7 +91,8 @@ int main(int argc, char *argv[])
         ("log,l", po::value<std::string>(), "set log file")
         ("log-to-stderr", "write log to stderr")
 
-        //("maximum-number-of-iterations,", po::value<int>(), "set the maximum number of iterations")
+        ("maximum-number-of-nodes,", po::value<int>(), "set maximum number of nodes")
+        ("number-of-threads,", po::value<int>(), "set number of threads")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);

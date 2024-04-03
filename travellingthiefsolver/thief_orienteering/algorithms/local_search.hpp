@@ -15,6 +15,38 @@ namespace travellingthiefsolver
 namespace thief_orienteering
 {
 
+struct LocalSearchParameters: Parameters
+{
+    /** Maximum number of nodes. */
+    Counter maximum_number_of_nodes = -1;
+
+    /** Number of threads. */
+    Counter number_of_threads = 1;
+
+
+    virtual int format_width() const override { return 31; }
+
+    virtual void format(std::ostream& os) const override
+    {
+        Parameters::format(os);
+        int width = format_width();
+        os
+            << std::setw(width) << std::left << "Maximum number of nodes: " << maximum_number_of_nodes << std::endl
+            << std::setw(width) << std::left << "Number of threads: " << number_of_threads << std::endl
+            ;
+    }
+
+    virtual nlohmann::json to_json() const override
+    {
+        nlohmann::json json = Parameters::to_json();
+        json.merge_patch({
+                {"MaximumNumberOfNodes", maximum_number_of_nodes},
+                {"NumberOfThreads", number_of_threads},
+                });
+        return json;
+    }
+};
+
 /**
  * Local search algorithm for the travelling thief problem.
  *
@@ -26,13 +58,13 @@ namespace thief_orienteering
  */
 const Output local_search(
         const Instance& instance,
-        const Parameters& parameters = {});
+        const LocalSearchParameters& parameters = {});
 
 template <typename Distances>
 const Output local_search(
         const Distances& distances,
         const Instance& instance,
-        const Parameters& parameters = {});
+        const LocalSearchParameters& parameters = {});
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -187,7 +219,7 @@ template <typename Distances>
 const Output local_search(
         const Distances& distances,
         const Instance& instance,
-        const Parameters& parameters)
+        const LocalSearchParameters& parameters)
 {
     Output output(distances, instance);
     AlgorithmFormatter algorithm_formatter(parameters, output);
@@ -218,20 +250,24 @@ const Output local_search(
     localsearchsolver::BestFirstLocalSearchParameters<LocalScheme> bfls_parameters;
     bfls_parameters.verbosity_level = 0;
     bfls_parameters.timer = parameters.timer;
-    //bfls_parameters.maximum_number_of_nodes = 100;
+    bfls_parameters.maximum_number_of_nodes = parameters.maximum_number_of_nodes;
+    bfls_parameters.number_of_threads_2 = parameters.number_of_threads;
     bfls_parameters.new_solution_callback
         = [&instance, &distances, &city_states, &algorithm_formatter](
-                const localsearchsolver::Output<LocalScheme>& ls_output)
+                const localsearchsolver::Output<LocalScheme>& lss_output)
         {
+            const auto& lssbfls_output = static_cast<const localsearchsolver::BestFirstLocalSearchOutput<LocalScheme>&>(lss_output);
             Solution solution(distances, instance);
-            for (auto se: ls_output.solution_pool.best().sequences[0].elements) {
+            for (auto se: lss_output.solution_pool.best().sequences[0].elements) {
                 CityId city_id = se.element_id + 1;
                 solution.add_city(distances, city_id);
                 for (ItemId item_id: city_states[city_id][se.mode].item_ids) {
                     solution.add_item(distances, item_id);
                 }
             }
-            algorithm_formatter.update_solution(solution, "");
+            std::stringstream ss;
+            ss << "node " << lssbfls_output.number_of_nodes;
+            algorithm_formatter.update_solution(solution, ss.str());
         };
     best_first_local_search(local_scheme, bfls_parameters);
 

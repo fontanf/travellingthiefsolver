@@ -64,7 +64,7 @@ template <typename Distances>
 const Output local_search(
         const Distances& distances,
         const Instance& instance,
-        const Parameters& parameters = {});
+        const LocalSearchParameters& parameters = {});
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -220,7 +220,6 @@ const Output local_search(
     algorithm_formatter.start("Local search");
     algorithm_formatter.print_header();
 
-    //instance.distances().compute_distances();
     auto city_states = packing_while_travelling::compute_city_states<Instance>(instance);
 
     //for (CityId city_id = 0; city_id < instance.number_of_cities(); ++city_id) {
@@ -272,17 +271,20 @@ const Output local_search(
     lssgls_parameters.number_of_threads = parameters.number_of_threads;
     lssgls_parameters.new_solution_callback
         = [&instance, &distances, &city_states, &algorithm_formatter](
-                const localsearchsolver::Output<LocalScheme>& ls_output)
+                const localsearchsolver::Output<LocalScheme>& lss_output)
         {
+            const auto& lssgls_output = static_cast<const localsearchsolver::GeneticLocalSearchOutput<LocalScheme>&>(lss_output);
             Solution solution(instance);
-            for (auto se: ls_output.solution_pool.best().sequences[0].elements) {
+            for (auto se: lss_output.solution_pool.best().sequences[0].elements) {
                 CityId city_id = se.element_id + 1;
                 solution.add_city(distances, city_id);
                 for (ItemId item_id: city_states[city_id][se.mode].item_ids) {
                     solution.add_item(distances, item_id);
                 }
             }
-            algorithm_formatter.update_solution(solution, "");
+            std::stringstream ss;
+            ss << "iteration " << lssgls_output.number_of_iterations;
+            algorithm_formatter.update_solution(solution, ss.str());
         };
     localsearchsolver::genetic_local_search(local_scheme, lssgls_parameters);
 
