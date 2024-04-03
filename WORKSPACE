@@ -79,7 +79,7 @@ local_repository(
 git_repository(
     name = "localsearchsolver",
     remote = "https://github.com/fontanf/localsearchsolver.git",
-    commit = "3d51090f54a0b2a155a33fce40ee1dd9da0d161a",
+    commit = "b49b95480671a886afb8159f565c3673cce2dd03",
 )
 
 local_repository(
