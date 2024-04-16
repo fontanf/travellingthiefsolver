@@ -9,7 +9,7 @@ target_include_directories(TravellingThiefSolver_travelling_while_packing PUBLIC
 target_link_libraries(TravellingThiefSolver_travelling_while_packing PUBLIC
     OptimizationTools::containers
     TravelingSalesmanSolver::distances)
-add_library(TravellingThiefSolver::knapsack ALIAS TravellingThiefSolver_travelling_while_packing)
+add_library(TravellingThiefSolver::travelling_while_packing ALIAS TravellingThiefSolver_travelling_while_packing)
 
 add_subdirectory(algorithms)
 

@@ -13,7 +13,7 @@ target_link_libraries(TravellingThiefSolver_travelling_thief PUBLIC
     TravelingSalesmanSolver::distances
     TravelingSalesmanSolver::lkh
     OptimizationTools::utils)
-add_library(TravellingThiefSolver::knapsack ALIAS TravellingThiefSolver_travelling_thief)
+add_library(TravellingThiefSolver::travelling_thief ALIAS TravellingThiefSolver_travelling_thief)
 
 add_subdirectory(algorithms)
 

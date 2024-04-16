@@ -9,7 +9,7 @@ target_include_directories(TravellingThiefSolver_thief_orienteering PUBLIC
 target_link_libraries(TravellingThiefSolver_thief_orienteering PUBLIC
     OptimizationTools::utils
     TravelingSalesmanSolver::distances)
-add_library(TravellingThiefSolver::knapsack ALIAS TravellingThiefSolver_thief_orienteering)
+add_library(TravellingThiefSolver::thief_orienteering ALIAS TravellingThiefSolver_thief_orienteering)
 
 add_subdirectory(algorithms)
 
