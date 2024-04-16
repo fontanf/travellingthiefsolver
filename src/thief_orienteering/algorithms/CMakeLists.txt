@@ -1,0 +1,19 @@
+add_library(TravellingThiefSolver_thief_orienteering_tree_search)
+target_sources(TravellingThiefSolver_thief_orienteering_tree_search PRIVATE
+    tree_search.cpp)
+target_include_directories(TravellingThiefSolver_thief_orienteering_tree_search PUBLIC
+    ${PROJECT_SOURCE_DIR}/include)
+target_link_libraries(TravellingThiefSolver_thief_orienteering_tree_search PUBLIC
+    TravellingThiefSolver_thief_orienteering
+    TreeSearchSolver::treesearchsolver)
+add_library(TravellingThiefSolver::thief_orienteering::tree_search ALIAS TravellingThiefSolver_thief_orienteering_tree_search)
+
+add_library(TravellingThiefSolver_thief_orienteering_local_search)
+target_sources(TravellingThiefSolver_thief_orienteering_local_search PRIVATE
+    local_search.cpp)
+target_include_directories(TravellingThiefSolver_thief_orienteering_local_search PUBLIC
+    ${PROJECT_SOURCE_DIR}/include)
+target_link_libraries(TravellingThiefSolver_thief_orienteering_local_search PUBLIC
+    TravellingThiefSolver_thief_orienteering
+    LocalSearchSolver::localsearchsolver)
+add_library(TravellingThiefSolver::thief_orienteering::local_search ALIAS TravellingThiefSolver_thief_orienteering_local_search)

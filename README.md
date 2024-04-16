@@ -61,7 +61,9 @@ Authors:
 
 Compile:
 ```shell
-bazel build -- //...
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release --parallel
+cmake --install build --config Release --prefix install
 ```
 
 Download data:
@@ -72,7 +74,7 @@ python3 scripts/download_data.py
 Examples:
 
 ```shell
-./bazel-bin/travellingthiefsolver/travelling_thief/main -v 1 -i "data/travelling_thief/gecco2023/fnl4461_n4460_bounded-strongly-corr_01.ttp" -a "iterative-tsp-pwt-ttp" -t 600
+./install/bin/travellingthiefsolver_travelling_thief  --verbosity-level 1  --input "data/travelling_thief/gecco2023/fnl4461_n4460_bounded-strongly-corr_01.ttp"  --algorithm "iterative-tsp-pwt-ttp"  --time-limit 600
 ```
 ```
 =====================================

@@ -1,0 +1,9 @@
+add_library(TravellingThiefSolver_travelling_while_packing_local_search)
+target_sources(TravellingThiefSolver_travelling_while_packing_local_search PRIVATE
+    local_search.cpp)
+target_include_directories(TravellingThiefSolver_travelling_while_packing_local_search PUBLIC
+    ${PROJECT_SOURCE_DIR}/include)
+target_link_libraries(TravellingThiefSolver_travelling_while_packing_local_search PUBLIC
+    TravellingThiefSolver_travelling_while_packing
+    LocalSearchSolver::localsearchsolver)
+add_library(TravellingThiefSolver::travelling_while_packing::local_search ALIAS TravellingThiefSolver_travelling_while_packing_local_search)
