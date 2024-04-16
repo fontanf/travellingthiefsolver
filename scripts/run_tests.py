@@ -14,11 +14,11 @@ args = parser.parse_args()
 
 
 
+travelling_thief_data = os.environ['TRAVELLING_THIEF_DATA']
 travelling_thief_main = os.path.join(
-        "bazel-bin",
-        "travellingthiefsolver",
-        "travelling_thief",
-        "main")
+        "install",
+        "bin",
+        "travellingthiefsolver_travelling_thief")
 
 
 if args.tests is None or "travelling-thief-local-search" in args.tests:
@@ -26,7 +26,7 @@ if args.tests is None or "travelling-thief-local-search" in args.tests:
     print("---------------------------------------")
     print()
 
-    travelling_thief_local_search_data = [
+    data = [
             os.path.join("polyakovskiy2014", "berlin52-ttp", "berlin52_n51_bounded-strongly-corr_01.ttp"),
             os.path.join("polyakovskiy2014", "berlin52-ttp", "berlin52_n51_uncorr_01.ttp"),
             os.path.join("polyakovskiy2014", "berlin52-ttp", "berlin52_n51_uncorr-similar-weights_01.ttp"),
@@ -36,10 +36,9 @@ if args.tests is None or "travelling-thief-local-search" in args.tests:
             os.path.join("polyakovskiy2014", "berlin52-ttp", "berlin52_n255_bounded-strongly-corr_01.ttp"),
             os.path.join("polyakovskiy2014", "berlin52-ttp", "berlin52_n255_uncorr_01.ttp"),
             os.path.join("polyakovskiy2014", "berlin52-ttp", "berlin52_n255_uncorr-similar-weights_01.ttp")]
-    for instance in travelling_thief_local_search_data:
+    for instance in data:
         instance_path = os.path.join(
-                "data",
-                "travelling_thief",
+                travelling_thief_data,
                 instance)
         json_output_path = os.path.join(
                 args.directory,
@@ -67,7 +66,7 @@ if args.tests is None or "travelling-thief-tree-search" in args.tests:
     print("--------------------------------------")
     print()
 
-    travelling_thief_tree_search_data = [
+    data = [
             os.path.join("wu2017", "eil51_n14_m13_multiple-strongly-corr_01.ttp"),
             os.path.join("wu2017", "eil51_n14_m13_uncorr_01.ttp"),
             os.path.join("wu2017", "eil51_n14_m13_uncorr-similar-weights_01.ttp"),
@@ -77,10 +76,9 @@ if args.tests is None or "travelling-thief-tree-search" in args.tests:
             os.path.join("wu2017", "eil51_n05_m40_multiple-strongly-corr_01.ttp"),
             os.path.join("wu2017", "eil51_n05_m40_uncorr_01.ttp"),
             os.path.join("wu2017", "eil51_n05_m40_uncorr-similar-weights_01.ttp")]
-    for instance in travelling_thief_tree_search_data:
+    for instance in data:
         instance_path = os.path.join(
-                "data",
-                "travelling_thief",
+                travelling_thief_data,
                 instance)
         json_output_path = os.path.join(
                 args.directory,
@@ -102,11 +100,11 @@ if args.tests is None or "travelling-thief-tree-search" in args.tests:
     print()
 
 
+thief_orienteering_data = os.environ['THIEF_ORIENTEERING_DATA']
 thief_orienteering_main = os.path.join(
-        "bazel-bin",
-        "travellingthiefsolver",
-        "thief_orienteering",
-        "main")
+        "install",
+        "bin",
+        "travellingthiefsolver_thief_orienteering")
 
 
 if args.tests is None or "thief-orienteering-local-search" in args.tests:
@@ -114,7 +112,7 @@ if args.tests is None or "thief-orienteering-local-search" in args.tests:
     print("---------------------------------")
     print()
 
-    thief_orienteering_local_search_data = [
+    data = [
             os.path.join("santos2018", "eil51-thop", "eil51_01_bsc_01_01.thop"),
             os.path.join("santos2018", "eil51-thop", "eil51_01_unc_05_01.thop"),
             os.path.join("santos2018", "eil51-thop", "eil51_01_usw_10_01.thop"),
@@ -124,10 +122,9 @@ if args.tests is None or "thief-orienteering-local-search" in args.tests:
             os.path.join("santos2018", "eil51-thop", "eil51_05_bsc_10_01.thop"),
             os.path.join("santos2018", "eil51-thop", "eil51_05_unc_01_01.thop"),
             os.path.join("santos2018", "eil51-thop", "eil51_05_usw_05_01.thop")]
-    for instance in thief_orienteering_local_search_data:
+    for instance in data:
         instance_path = os.path.join(
-                "data",
-                "thief_orienteering",
+                thief_orienteering_data,
                 instance)
         json_output_path = os.path.join(
                 args.directory,

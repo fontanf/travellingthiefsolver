@@ -1,0 +1,23 @@
+add_library(TravellingThiefSolver_travelling_while_packing)
+target_sources(TravellingThiefSolver_travelling_while_packing PRIVATE
+    instance.cpp
+    instance_builder.cpp
+    solution.cpp
+    algorithm_formatter.cpp)
+target_include_directories(TravellingThiefSolver_travelling_while_packing PUBLIC
+    ${PROJECT_SOURCE_DIR}/include)
+target_link_libraries(TravellingThiefSolver_travelling_while_packing PUBLIC
+    OptimizationTools::containers
+    TravelingSalesmanSolver::distances)
+add_library(TravellingThiefSolver::knapsack ALIAS TravellingThiefSolver_travelling_while_packing)
+
+add_subdirectory(algorithms)
+
+add_executable(TravellingThiefSolver_travelling_while_packing_main)
+target_sources(TravellingThiefSolver_travelling_while_packing_main PRIVATE
+    main.cpp)
+target_link_libraries(TravellingThiefSolver_travelling_while_packing_main PUBLIC
+    TravellingThiefSolver_travelling_while_packing_local_search
+    Boost::program_options)
+set_target_properties(TravellingThiefSolver_travelling_while_packing_main PROPERTIES OUTPUT_NAME "travellingthiefsolver_travelling_while_packing")
+install(TARGETS TravellingThiefSolver_travelling_while_packing_main)

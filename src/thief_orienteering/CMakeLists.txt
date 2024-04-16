@@ -1,0 +1,33 @@
+add_library(TravellingThiefSolver_thief_orienteering)
+target_sources(TravellingThiefSolver_thief_orienteering PRIVATE
+    instance.cpp
+    instance_builder.cpp
+    solution.cpp
+    algorithm_formatter.cpp)
+target_include_directories(TravellingThiefSolver_thief_orienteering PUBLIC
+    ${PROJECT_SOURCE_DIR}/include)
+target_link_libraries(TravellingThiefSolver_thief_orienteering PUBLIC
+    OptimizationTools::utils
+    TravelingSalesmanSolver::distances)
+add_library(TravellingThiefSolver::knapsack ALIAS TravellingThiefSolver_thief_orienteering)
+
+add_subdirectory(algorithms)
+
+add_executable(TravellingThiefSolver_thief_orienteering_main)
+target_sources(TravellingThiefSolver_thief_orienteering_main PRIVATE
+    main.cpp)
+target_link_libraries(TravellingThiefSolver_thief_orienteering_main PUBLIC
+    TravellingThiefSolver_thief_orienteering_tree_search
+    TravellingThiefSolver_thief_orienteering_local_search
+    Boost::program_options)
+set_target_properties(TravellingThiefSolver_thief_orienteering_main PROPERTIES OUTPUT_NAME "travellingthiefsolver_thief_orienteering")
+install(TARGETS TravellingThiefSolver_thief_orienteering_main)
+
+add_executable(TravellingThiefSolver_thief_orienteering_checker)
+target_sources(TravellingThiefSolver_thief_orienteering_checker PRIVATE
+    checker.cpp)
+target_link_libraries(TravellingThiefSolver_thief_orienteering_checker PUBLIC
+    TravellingThiefSolver_thief_orienteering
+    Boost::program_options)
+set_target_properties(TravellingThiefSolver_thief_orienteering_checker PROPERTIES OUTPUT_NAME "travellingthiefsolver_thief_orienteering_checker")
+install(TARGETS TravellingThiefSolver_thief_orienteering_checker)
