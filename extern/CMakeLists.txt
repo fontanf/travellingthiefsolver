@@ -5,22 +5,25 @@ include(FetchContent)
 FetchContent_Declare(
     knapsacksolver
     GIT_REPOSITORY https://github.com/fontanf/knapsacksolver.git
-    GIT_TAG abbe052b56c6e985112cda23abda26f1eb0e43ce)
-    #SOURCE_DIR "${PROJECT_SOURCE_DIR}/../knapsacksolver/")
+    GIT_TAG 5115e4db582c97e2e1ade8ea3ab5e678a921b223
+    #SOURCE_DIR "${PROJECT_SOURCE_DIR}/../knapsacksolver/"
+    EXCLUDE_FROM_ALL)
 FetchContent_MakeAvailable(knapsacksolver)
 
 # Fetch fontanf/treesearchsolver.
 FetchContent_Declare(
     treesearchsolver
     GIT_REPOSITORY https://github.com/fontanf/treesearchsolver.git
-    GIT_TAG dca5b35d5cb6de3443b9ab08175f931b2df29b6b)
-    #SOURCE_DIR "${PROJECT_SOURCE_DIR}/../treesearchsolver/")
+    GIT_TAG 980bdd0d04f1a8a233a3af310d3152d812d614ce
+    #SOURCE_DIR "${PROJECT_SOURCE_DIR}/../treesearchsolver/"
+    EXCLUDE_FROM_ALL)
 FetchContent_MakeAvailable(treesearchsolver)
 
 # Fetch fontanf/localsearchsolver.
 FetchContent_Declare(
     localsearchsolver
     GIT_REPOSITORY https://github.com/fontanf/localsearchsolver.git
-    GIT_TAG ecb15ef667d107f25ea51d056368f9c4e15545e2)
-    #SOURCE_DIR "${PROJECT_SOURCE_DIR}/../localsearchsolver/")
+    GIT_TAG f7110fdd15fa1b9001006bfbf7a8ab53f925016d
+    #SOURCE_DIR "${PROJECT_SOURCE_DIR}/../localsearchsolver/"
+    EXCLUDE_FROM_ALL)
 FetchContent_MakeAvailable(localsearchsolver)
