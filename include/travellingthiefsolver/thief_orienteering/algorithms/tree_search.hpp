@@ -45,7 +45,7 @@ public:
         treesearchsolver::NodeId node_id = -1;
 
         /** Parent of the node. */
-        std::shared_ptr<Node> father = nullptr;
+        std::shared_ptr<Node> parent = nullptr;
 
         /** Visited cities. */
         std::vector<bool> visited_cities;
@@ -172,33 +172,33 @@ public:
     }
 
     inline std::shared_ptr<Node> next_child(
-            const std::shared_ptr<Node>& father) const
+            const std::shared_ptr<Node>& parent) const
     {
-        assert(!infertile(father));
-        assert(!leaf(father));
-        //std::cout << "father id " << father->node_id
-        //    << " next_child_city_id " << father->next_child_city_id
-        //    << " next_child_city_state_id " << father->next_child_city_state_id
+        assert(!infertile(parent));
+        assert(!leaf(parent));
+        //std::cout << "parent id " << parent->node_id
+        //    << " next_child_city_id " << parent->next_child_city_id
+        //    << " next_child_city_state_id " << parent->next_child_city_state_id
         //    << std::endl;
-        //std::cout << father->bound << " " << father->objective << std::endl;
+        //std::cout << parent->bound << " " << parent->objective << std::endl;
 
-        CityId city_id_next = father->next_child_city_id;;
-        CityStateId city_state_id_next = father->next_child_city_state_id;
+        CityId city_id_next = parent->next_child_city_id;;
+        CityStateId city_state_id_next = parent->next_child_city_state_id;
 
-        // Update father
-        father->next_child_city_state_id++;
-        if (father->next_child_city_state_id
-                == (CityStateId)city_states_[father->next_child_city_id].size()) {
-            father->next_child_city_id++;
-            father->next_child_city_state_id = 0;
+        // Update parent
+        parent->next_child_city_state_id++;
+        if (parent->next_child_city_state_id
+                == (CityStateId)city_states_[parent->next_child_city_id].size()) {
+            parent->next_child_city_id++;
+            parent->next_child_city_state_id = 0;
         }
 
         // Check if the next city has already been visited.
-        if (father->visited_cities[city_id_next])
+        if (parent->visited_cities[city_id_next])
             return nullptr;
 
         // Check capacity.
-        Weight weight = father->weight
+        Weight weight = parent->weight
             + city_states_[city_id_next][city_state_id_next].total_weight;
         if (weight > instance_.capacity())
             return nullptr;
@@ -206,43 +206,43 @@ public:
         // Check time limit.
         Time t = instance_.duration(
                 distances_,
-                father->last_visited_city_id,
+                parent->last_visited_city_id,
                 city_id_next,
-                father->weight);
+                parent->weight);
         Time t_end = instance_.duration(
                 distances_,
                 city_id_next,
                 instance().number_of_cities() - 1,
                 weight);
-        if (father->time + t + t_end > instance().time_limit())
+        if (parent->time + t + t_end > instance().time_limit())
             return nullptr;
 
         // Compute new child.
         auto child = std::shared_ptr<Node>(new BranchingScheme::Node());
         child->node_id = node_id_cur_;
         node_id_cur_++;
-        child->father = father;
-        child->visited_cities = father->visited_cities;
+        child->parent = parent;
+        child->visited_cities = parent->visited_cities;
         child->visited_cities[city_id_next] = true;
         child->last_visited_city_id = city_id_next;
         child->last_visited_city_state_id = city_state_id_next;
-        child->number_of_cities = father->number_of_cities + 1;
-        child->number_of_items = father->number_of_items
+        child->number_of_cities = parent->number_of_cities + 1;
+        child->number_of_items = parent->number_of_items
             + city_states_[city_id_next][city_state_id_next].item_ids.size();
         Distance d = distances_.distance(
-                father->last_visited_city_id,
+                parent->last_visited_city_id,
                 city_id_next);
-        child->distance = father->distance + d;
-        child->time = father->time + t;
-        child->profit = father->profit
+        child->distance = parent->distance + d;
+        child->time = parent->time + t;
+        child->profit = parent->profit
             + city_states_[city_id_next][city_state_id_next].total_profit;
-        child->weight = father->weight
+        child->weight = parent->weight
             + city_states_[city_id_next][city_state_id_next].total_weight;
-        child->minimum_remaining_distance = father->minimum_remaining_distance
+        child->minimum_remaining_distance = parent->minimum_remaining_distance
             - closest_city_distances_[city_id_next];
-        child->remaining_profit = father->remaining_profit
+        child->remaining_profit = parent->remaining_profit
             - city_states_[city_id_next].back().total_profit;
-        child->remaining_weight = father->remaining_weight
+        child->remaining_weight = parent->remaining_weight
             - city_states_[city_id_next].back().total_weight;
         Time d_end = distances_.distance(
                 city_id_next,
@@ -376,13 +376,13 @@ public:
     }
 
     std::ostream& print_solution(
-            std::ostream &os,
+            std::ostream& os,
             const std::shared_ptr<Node>& node) const
     {
         os << "node_id " << node->node_id << std::endl;
         for (auto node_tmp = node;
-                node_tmp->father != nullptr;
-                node_tmp = node_tmp->father) {
+                node_tmp->parent != nullptr;
+                node_tmp = node_tmp->parent) {
             os << "node_tmp"
                 << " n " << node_tmp->number_of_cities
                 << " m " << node_tmp->number_of_items
@@ -457,8 +457,8 @@ const Output tree_search(
             auto node = bfs_output.solution_pool.best();
             std::vector<std::shared_ptr<typename BranchingScheme<Distances>::Node>> ancestors;
             for (auto node_tmp = node;
-                    node_tmp->father != nullptr;
-                    node_tmp = node_tmp->father) {
+                    node_tmp->parent != nullptr;
+                    node_tmp = node_tmp->parent) {
                 ancestors.push_back(node_tmp);
             }
             std::reverse(ancestors.begin(), ancestors.end());
