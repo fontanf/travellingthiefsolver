@@ -17,33 +17,35 @@ add_library(TravellingThiefSolver::travelling_thief ALIAS TravellingThiefSolver_
 
 add_subdirectory(algorithms)
 
-add_executable(TravellingThiefSolver_travelling_thief_main)
-target_sources(TravellingThiefSolver_travelling_thief_main PRIVATE
-    main.cpp)
-target_link_libraries(TravellingThiefSolver_travelling_thief_main PUBLIC
-    TravellingThiefSolver_travelling_thief_tree_search
-    TravellingThiefSolver_travelling_thief_local_search
-    TravellingThiefSolver_travelling_thief_efficient_local_search
-    TravellingThiefSolver_travelling_thief_iterative_tsp_pwt
-    TravellingThiefSolver_travelling_thief_iterative_tsp_pwt_ttp
-    Boost::program_options)
-set_target_properties(TravellingThiefSolver_travelling_thief_main PROPERTIES OUTPUT_NAME "travellingthiefsolver_travelling_thief")
-install(TARGETS TravellingThiefSolver_travelling_thief_main)
+if(TRAVELLINGTHIEFSOLVER_BUILD_MAIN)
+    add_executable(TravellingThiefSolver_travelling_thief_main)
+    target_sources(TravellingThiefSolver_travelling_thief_main PRIVATE
+        main.cpp)
+    target_link_libraries(TravellingThiefSolver_travelling_thief_main PUBLIC
+        TravellingThiefSolver_travelling_thief_tree_search
+        TravellingThiefSolver_travelling_thief_local_search
+        TravellingThiefSolver_travelling_thief_efficient_local_search
+        TravellingThiefSolver_travelling_thief_iterative_tsp_pwt
+        TravellingThiefSolver_travelling_thief_iterative_tsp_pwt_ttp
+        Boost::program_options)
+    set_target_properties(TravellingThiefSolver_travelling_thief_main PROPERTIES OUTPUT_NAME "travellingthiefsolver_travelling_thief")
+    install(TARGETS TravellingThiefSolver_travelling_thief_main)
 
-add_executable(TravellingThiefSolver_travelling_thief_checker)
-target_sources(TravellingThiefSolver_travelling_thief_checker PRIVATE
-    checker.cpp)
-target_link_libraries(TravellingThiefSolver_travelling_thief_checker PUBLIC
-    TravellingThiefSolver_travelling_thief
-    Boost::program_options)
-set_target_properties(TravellingThiefSolver_travelling_thief_checker PROPERTIES OUTPUT_NAME "travellingthiefsolver_travelling_thief_checker")
-install(TARGETS TravellingThiefSolver_travelling_thief_checker)
+    add_executable(TravellingThiefSolver_travelling_thief_checker)
+    target_sources(TravellingThiefSolver_travelling_thief_checker PRIVATE
+        checker.cpp)
+    target_link_libraries(TravellingThiefSolver_travelling_thief_checker PUBLIC
+        TravellingThiefSolver_travelling_thief
+        Boost::program_options)
+    set_target_properties(TravellingThiefSolver_travelling_thief_checker PROPERTIES OUTPUT_NAME "travellingthiefsolver_travelling_thief_checker")
+    install(TARGETS TravellingThiefSolver_travelling_thief_checker)
 
-add_executable(TravellingThiefSolver_travelling_thief_solution2instances)
-target_sources(TravellingThiefSolver_travelling_thief_solution2instances PRIVATE
-    solution2instances.cpp)
-target_link_libraries(TravellingThiefSolver_travelling_thief_solution2instances PUBLIC
-    TravellingThiefSolver_travelling_thief
-    Boost::program_options)
-set_target_properties(TravellingThiefSolver_travelling_thief_solution2instances PROPERTIES OUTPUT_NAME "travellingthiefsolver_travelling_thief_solution2instances")
-install(TARGETS TravellingThiefSolver_travelling_thief_solution2instances)
+    add_executable(TravellingThiefSolver_travelling_thief_solution2instances)
+    target_sources(TravellingThiefSolver_travelling_thief_solution2instances PRIVATE
+        solution2instances.cpp)
+    target_link_libraries(TravellingThiefSolver_travelling_thief_solution2instances PUBLIC
+        TravellingThiefSolver_travelling_thief
+        Boost::program_options)
+    set_target_properties(TravellingThiefSolver_travelling_thief_solution2instances PROPERTIES OUTPUT_NAME "travellingthiefsolver_travelling_thief_solution2instances")
+    install(TARGETS TravellingThiefSolver_travelling_thief_solution2instances)
+endif()
