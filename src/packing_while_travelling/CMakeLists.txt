@@ -17,15 +17,17 @@ add_library(TravellingThiefSolver::packing_while_travelling ALIAS TravellingThie
 
 add_subdirectory(algorithms)
 
-add_executable(TravellingThiefSolver_packing_while_travelling_main)
-target_sources(TravellingThiefSolver_packing_while_travelling_main PRIVATE
-    main.cpp)
-target_link_libraries(TravellingThiefSolver_packing_while_travelling_main PUBLIC
-    TravellingThiefSolver_packing_while_travelling_greedy
-    TravellingThiefSolver_packing_while_travelling_sequential_value_correction
-    TravellingThiefSolver_packing_while_travelling_dynamic_programming
-    TravellingThiefSolver_packing_while_travelling_efficient_local_search
-    TravellingThiefSolver_packing_while_travelling_large_neighborhood_search
-    Boost::program_options)
-set_target_properties(TravellingThiefSolver_packing_while_travelling_main PROPERTIES OUTPUT_NAME "travellingthiefsolver_packing_while_travelling")
-install(TARGETS TravellingThiefSolver_packing_while_travelling_main)
+if(TRAVELLINGTHIEFSOLVER_BUILD_MAIN)
+    add_executable(TravellingThiefSolver_packing_while_travelling_main)
+    target_sources(TravellingThiefSolver_packing_while_travelling_main PRIVATE
+        main.cpp)
+    target_link_libraries(TravellingThiefSolver_packing_while_travelling_main PUBLIC
+        TravellingThiefSolver_packing_while_travelling_greedy
+        TravellingThiefSolver_packing_while_travelling_sequential_value_correction
+        TravellingThiefSolver_packing_while_travelling_dynamic_programming
+        TravellingThiefSolver_packing_while_travelling_efficient_local_search
+        TravellingThiefSolver_packing_while_travelling_large_neighborhood_search
+        Boost::program_options)
+    set_target_properties(TravellingThiefSolver_packing_while_travelling_main PROPERTIES OUTPUT_NAME "travellingthiefsolver_packing_while_travelling")
+    install(TARGETS TravellingThiefSolver_packing_while_travelling_main)
+endif()

@@ -13,21 +13,23 @@ add_library(TravellingThiefSolver::thief_orienteering ALIAS TravellingThiefSolve
 
 add_subdirectory(algorithms)
 
-add_executable(TravellingThiefSolver_thief_orienteering_main)
-target_sources(TravellingThiefSolver_thief_orienteering_main PRIVATE
-    main.cpp)
-target_link_libraries(TravellingThiefSolver_thief_orienteering_main PUBLIC
-    TravellingThiefSolver_thief_orienteering_tree_search
-    TravellingThiefSolver_thief_orienteering_local_search
-    Boost::program_options)
-set_target_properties(TravellingThiefSolver_thief_orienteering_main PROPERTIES OUTPUT_NAME "travellingthiefsolver_thief_orienteering")
-install(TARGETS TravellingThiefSolver_thief_orienteering_main)
+if(TRAVELLINGTHIEFSOLVER_BUILD_MAIN)
+    add_executable(TravellingThiefSolver_thief_orienteering_main)
+    target_sources(TravellingThiefSolver_thief_orienteering_main PRIVATE
+        main.cpp)
+    target_link_libraries(TravellingThiefSolver_thief_orienteering_main PUBLIC
+        TravellingThiefSolver_thief_orienteering_tree_search
+        TravellingThiefSolver_thief_orienteering_local_search
+        Boost::program_options)
+    set_target_properties(TravellingThiefSolver_thief_orienteering_main PROPERTIES OUTPUT_NAME "travellingthiefsolver_thief_orienteering")
+    install(TARGETS TravellingThiefSolver_thief_orienteering_main)
 
-add_executable(TravellingThiefSolver_thief_orienteering_checker)
-target_sources(TravellingThiefSolver_thief_orienteering_checker PRIVATE
-    checker.cpp)
-target_link_libraries(TravellingThiefSolver_thief_orienteering_checker PUBLIC
-    TravellingThiefSolver_thief_orienteering
-    Boost::program_options)
-set_target_properties(TravellingThiefSolver_thief_orienteering_checker PROPERTIES OUTPUT_NAME "travellingthiefsolver_thief_orienteering_checker")
-install(TARGETS TravellingThiefSolver_thief_orienteering_checker)
+    add_executable(TravellingThiefSolver_thief_orienteering_checker)
+    target_sources(TravellingThiefSolver_thief_orienteering_checker PRIVATE
+        checker.cpp)
+    target_link_libraries(TravellingThiefSolver_thief_orienteering_checker PUBLIC
+        TravellingThiefSolver_thief_orienteering
+        Boost::program_options)
+    set_target_properties(TravellingThiefSolver_thief_orienteering_checker PROPERTIES OUTPUT_NAME "travellingthiefsolver_thief_orienteering_checker")
+    install(TARGETS TravellingThiefSolver_thief_orienteering_checker)
+endif()

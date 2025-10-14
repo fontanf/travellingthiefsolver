@@ -14,7 +14,7 @@ target_include_directories(TravellingThiefSolver_packing_while_travelling_sequen
     ${PROJECT_SOURCE_DIR}/include)
 target_link_libraries(TravellingThiefSolver_packing_while_travelling_sequential_value_correction PUBLIC
     TravellingThiefSolver_packing_while_travelling
-    KnapsackSolver::knapsack::dynamic_programming_primal_dual)
+    KnapsackSolver::dynamic_programming_primal_dual)
 add_library(TravellingThiefSolver::packing_while_travelling::sequential_value_correction ALIAS TravellingThiefSolver_packing_while_travelling_sequential_value_correction)
 
 add_library(TravellingThiefSolver_packing_while_travelling_dynamic_programming)

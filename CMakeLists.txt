@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.15.0)
 
 project(TravellingThiefSolver LANGUAGES CXX)
 
+# Build options.
+option(TRAVELLINGTHIEFSOLVER_BUILD_MAIN "Build main" ON)
+option(TRAVELLINGTHIEFSOLVER_BUILD_TEST "Build the unit tests" ON)
+
 # Avoid FetchContent warning.
 cmake_policy(SET CMP0135 NEW)
 
@@ -14,4 +18,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Add sub-directories.
 add_subdirectory(extern)
 add_subdirectory(src)
-add_subdirectory(test)
+if(TRAVELLINGTHIEFSOLVER_BUILD_TEST)
+    add_subdirectory(test)
+endif()

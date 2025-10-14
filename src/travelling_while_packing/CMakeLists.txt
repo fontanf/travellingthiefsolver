@@ -13,11 +13,13 @@ add_library(TravellingThiefSolver::travelling_while_packing ALIAS TravellingThie
 
 add_subdirectory(algorithms)
 
-add_executable(TravellingThiefSolver_travelling_while_packing_main)
-target_sources(TravellingThiefSolver_travelling_while_packing_main PRIVATE
-    main.cpp)
-target_link_libraries(TravellingThiefSolver_travelling_while_packing_main PUBLIC
-    TravellingThiefSolver_travelling_while_packing_local_search
-    Boost::program_options)
-set_target_properties(TravellingThiefSolver_travelling_while_packing_main PROPERTIES OUTPUT_NAME "travellingthiefsolver_travelling_while_packing")
-install(TARGETS TravellingThiefSolver_travelling_while_packing_main)
+if(TRAVELLINGTHIEFSOLVER_BUILD_MAIN)
+    add_executable(TravellingThiefSolver_travelling_while_packing_main)
+    target_sources(TravellingThiefSolver_travelling_while_packing_main PRIVATE
+        main.cpp)
+    target_link_libraries(TravellingThiefSolver_travelling_while_packing_main PUBLIC
+        TravellingThiefSolver_travelling_while_packing_local_search
+        Boost::program_options)
+    set_target_properties(TravellingThiefSolver_travelling_while_packing_main PROPERTIES OUTPUT_NAME "travellingthiefsolver_travelling_while_packing")
+    install(TARGETS TravellingThiefSolver_travelling_while_packing_main)
+endif()

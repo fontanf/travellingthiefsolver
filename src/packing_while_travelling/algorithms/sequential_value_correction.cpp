@@ -3,8 +3,8 @@
 #include "travellingthiefsolver/packing_while_travelling/algorithm_formatter.hpp"
 #include "travellingthiefsolver/packing_while_travelling/solution_builder.hpp"
 
-#include "knapsacksolver/knapsack/instance_builder.hpp"
-#include "knapsacksolver/knapsack/algorithms/dynamic_programming_primal_dual.hpp"
+#include "knapsacksolver/instance_builder.hpp"
+#include "knapsacksolver/algorithms/dynamic_programming_primal_dual.hpp"
 
 using namespace travellingthiefsolver::packing_while_travelling;
 
@@ -18,7 +18,7 @@ Solution solve(
 {
     // Build knapsack instance.
     std::vector<ItemId> kp2pwt;
-    knapsacksolver::knapsack::InstanceFromFloatProfitsBuilder kp_instance_builder;
+    knapsacksolver::InstanceFromFloatProfitsBuilder kp_instance_builder;
     for (ItemId item_id = 0;
             item_id < instance.number_of_items();
             ++item_id) {
@@ -37,12 +37,12 @@ Solution solve(
         kp2pwt.push_back(item_id);
     }
     kp_instance_builder.set_capacity(instance.capacity() - instance.city_weight());
-    knapsacksolver::knapsack::Instance kp_instance = kp_instance_builder.build();
+    knapsacksolver::Instance kp_instance = kp_instance_builder.build();
 
     // Solve knapsack problem.
-    knapsacksolver::knapsack::DynamicProgrammingPrimalDualParameters kp_parameters;
+    knapsacksolver::DynamicProgrammingPrimalDualParameters kp_parameters;
     kp_parameters.verbosity_level = 0;
-    auto kp_output = knapsacksolver::knapsack::dynamic_programming_primal_dual(
+    auto kp_output = knapsacksolver::dynamic_programming_primal_dual(
             kp_instance,
             kp_parameters);
     //std::cout << "kp " << kp_output.solution.profit() << std::endl;
@@ -51,7 +51,7 @@ Solution solve(
     SolutionBuilder solution_builder;
     solution_builder.set_instance(instance);
     // Loop though knapsack items.
-    for (knapsacksolver::knapsack::ItemId kp_item_id = 0;
+    for (knapsacksolver::ItemId kp_item_id = 0;
             kp_item_id < kp_instance.number_of_items();
             ++kp_item_id) {
         if (kp_output.solution.contains(kp_item_id)) {
