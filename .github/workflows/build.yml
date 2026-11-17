@@ -11,8 +11,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-13, macos-latest]
-        python-version: ["3.8"]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.12"]
 
     env:
       TRAVELLING_THIEF_DATA: ${{ github.workspace }}/data/travelling_thief
@@ -34,7 +34,9 @@ jobs:
     - name: Build
       run: |
         cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-        cmake --build build --config Release --parallel
+        # Bound the number of jobs: without a value, '--parallel' runs an unlimited
+        # 'make -j', which makes the runners run out of memory.
+        cmake --build build --config Release --parallel ${{ runner.os == 'macOS' && 3 || 4 }}
         cmake --install build --config Release --prefix install
     - name: Run tests
       run: python3 -u scripts/run_tests.py test_results
@@ -46,7 +48,9 @@ jobs:
     - name: Build
       run: |
         cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-        cmake --build build --config Release --parallel
+        # Bound the number of jobs: without a value, '--parallel' runs an unlimited
+        # 'make -j', which makes the runners run out of memory.
+        cmake --build build --config Release --parallel ${{ runner.os == 'macOS' && 3 || 4 }}
         cmake --install build --config Release --prefix install
     - name: Run tests
       run: python3 -u scripts/run_tests.py test_results_ref
