@@ -8,7 +8,7 @@
 #include "travellingthiefsolver/packing_while_travelling/algorithms/sequential_value_correction.hpp"
 #include "travellingthiefsolver/packing_while_travelling/algorithms/efficient_local_search.hpp"
 
-#include "travelingsalesmansolver/algorithms/lkh.hpp"
+#include "travelingsalesmansolver/candidates/candidate_lists.hpp"
 
 #include "localsearchsolver/sequencing.hpp"
 #include "localsearchsolver/multi_start_local_search.hpp"
@@ -25,8 +25,8 @@ struct EfficientLocalSearchParameters: Parameters
     /** Initial solution. */
     const Solution* initial_solution = nullptr;
 
-    /** LKH candidate file content. */
-    std::string lkh_candidate_file_content;
+    /** Candidates of the TSP; computed if empty. */
+    travelingsalesmansolver::CandidateLists tsp_candidates;
 
     /** Enable change-city-state neighborhood. */
     int neighborhood_change_city_state = -1;
@@ -444,7 +444,7 @@ public:
                 tsp_instance_,
                 generator,
                 parameters_,
-                lkh_candidate_file_content_);
+                tsp_candidates_);
 
         for (const auto& tsp_solution: tsp_solutions) {
 
@@ -676,11 +676,8 @@ private:
     /** TSP instance. */
     travelingsalesmansolver::Instance tsp_instance_;
 
-    /** LKH candidate file content. */
-    std::string lkh_candidate_file_content_;
-
-    /** LKH candidates. */
-    std::vector<travelingsalesmansolver::LkhCandidate> lkh_candidates_;
+    /** Candidates of the TSP. */
+    travelingsalesmansolver::CandidateLists tsp_candidates_;
 
     /** Parameters. */
     const EfficientLocalSearchParameters& parameters_;
@@ -712,14 +709,13 @@ EfficientLocalScheme<Distances>::EfficientLocalScheme(
     distances_(distances),
     city_states_(city_states),
     tsp_instance_(create_tsp_instance(instance)),
-    lkh_candidate_file_content_(parameters.lkh_candidate_file_content),
+    tsp_candidates_(parameters.tsp_candidates),
     parameters_(parameters),
     output_(output),
     algorithm_formatter_(algorithm_formatter)
 {
-    if (parameters.lkh_candidate_file_content.empty())
+    if (parameters.tsp_candidates.empty())
         generate_initial_solutions(generator);
-    lkh_candidates_ = travelingsalesmansolver::read_candidates(lkh_candidate_file_content_);
 
     // Generate moves.
     // Change city state.
@@ -747,11 +743,11 @@ EfficientLocalScheme<Distances>::EfficientLocalScheme(
         for (CityId city_id = 1;
                 city_id < instance.number_of_cities();
                 ++city_id) {
-            for (const auto& candidate: lkh_candidates_[city_id].edges) {
+            for (CityId city_id_2: tsp_candidates_[city_id]) {
                 Move move;
                 move.type = MoveType::TwoOpt;
                 move.city_id = city_id;
-                move.city_id_2 = candidate.vertex_id;
+                move.city_id_2 = city_id_2;
                 moves_[parameters.neighborhood_two_opt].push_back(move);
             }
         }
@@ -763,11 +759,11 @@ EfficientLocalScheme<Distances>::EfficientLocalScheme(
         for (CityId city_id = 1;
                 city_id < instance.number_of_cities();
                 ++city_id) {
-            for (const auto& candidate: lkh_candidates_[city_id].edges) {
+            for (CityId city_id_2: tsp_candidates_[city_id]) {
                 Move move;
                 move.type = MoveType::TwoOptChangeCityStates;
                 move.city_id = city_id;
-                move.city_id_2 = candidate.vertex_id;
+                move.city_id_2 = city_id_2;
                 moves_[parameters.neighborhood_two_opt_change_city_states].push_back(move);
             }
         }

@@ -8,7 +8,7 @@
 #include "travellingthiefsolver/packing_while_travelling/algorithms/sequential_value_correction.hpp"
 #include "travellingthiefsolver/packing_while_travelling/algorithms/efficient_local_search.hpp"
 
-#include "travelingsalesmansolver/algorithms/lkh.hpp"
+#include "travelingsalesmansolver/candidates/candidate_lists.hpp"
 
 namespace travellingthiefsolver
 {
@@ -72,8 +72,7 @@ const IterativeTspPwtOutput iterative_tsp_pwt(
     // Create travelingsalesman instance.
     auto tsp_instance = create_tsp_instance(instance);
 
-    std::string lkh_candidate_file_content = "";
-    std::vector<travelingsalesmansolver::LkhCandidate> lkh_candidates;
+    travelingsalesmansolver::CandidateLists tsp_candidates;
 
     std::vector<Solution> svc_solutions;
 
@@ -88,7 +87,7 @@ const IterativeTspPwtOutput iterative_tsp_pwt(
                 tsp_instance,
                 generator,
                 parameters,
-                lkh_candidate_file_content);
+                tsp_candidates);
 
         auto tsp_end = std::chrono::steady_clock::now();
         std::chrono::duration<double> tsp_time_span
@@ -195,7 +194,7 @@ const IterativeTspPwtOutput iterative_tsp_pwt(
                 tsp_instance,
                 generator,
                 parameters,
-                lkh_candidate_file_content);
+                tsp_candidates);
 
         auto tsp_end = std::chrono::steady_clock::now();
         std::chrono::duration<double> tsp_time_span
