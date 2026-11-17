@@ -867,6 +867,11 @@ void EfficientLocalScheme<Distances>::local_search(
 
             for (const Move& move: moves) {
 
+                // Check the time limit between moves: a pass over all the
+                // moves can be very long on large instances.
+                if (parameters_.timer.needs_to_end())
+                    break;
+
                 if (move.type == MoveType::ChangeCityState) {
 
                     auto output = evaluate_change_city_state_move(
@@ -1223,6 +1228,8 @@ void EfficientLocalScheme<Distances>::local_search(
                 }
             }
             if (number_of_improvements > 0)
+                break;
+            if (parameters_.timer.needs_to_end())
                 break;
         }
 
