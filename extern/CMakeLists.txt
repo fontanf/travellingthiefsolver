@@ -40,7 +40,7 @@ set(TRAVELINGSALESMANSOLVER_BUILD_TEST OFF)
 FetchContent_Declare(
     travelingsalesmansolver
     GIT_REPOSITORY https://github.com/fontanf/travelingsalesmansolver.git
-    GIT_TAG ae5c463d52b1bc4f7deb89c7bf815373f047c56e
+    GIT_TAG 45a3020a2d7b1656f949200cb6aa72e2acc301df
     #SOURCE_DIR "${PROJECT_SOURCE_DIR}/../travelingsalesmansolver/"
     EXCLUDE_FROM_ALL)
 FetchContent_MakeAvailable(travelingsalesmansolver)

@@ -7,7 +7,11 @@
 #include "travellingthiefsolver/travelling_while_packing/solution.hpp"
 #include "travelingsalesmansolver/solution.hpp"
 
-#include "travelingsalesmansolver/algorithms/lkh.hpp"
+#include "travelingsalesmansolver/algorithms/lin_kernighan.hpp"
+#include "travelingsalesmansolver/candidates/alpha_nearness.hpp"
+
+#include <stdexcept>
+#include <string>
 
 namespace travellingthiefsolver
 {
@@ -49,7 +53,7 @@ std::vector<Solution> solve_tsp_lkh(
         const travelingsalesmansolver::Instance& tsp_instance,
         std::mt19937_64& generator,
         const Parameters& parameters,
-        std::string& lkh_candidate_file_content);
+        travelingsalesmansolver::CandidateLists& tsp_candidates);
 
 /*
  * PWT
@@ -93,15 +97,40 @@ Solution retrieve_solution(
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * Get the position of the depot (city 0) in a tour of the TSP.
+ *
+ * The tour doesn't necessarily start at the depot.
+ */
+inline CityId depot_position(
+        const Instance& instance,
+        const travelingsalesmansolver::Solution& tsp_solution)
+{
+    if (tsp_solution.number_of_vertices() != instance.number_of_cities()) {
+        throw std::invalid_argument(
+                "travellingthiefsolver::travelling_thief::depot_position: "
+                "the tour has " + std::to_string(tsp_solution.number_of_vertices())
+                + " cities instead of " + std::to_string(instance.number_of_cities()) + ".");
+    }
+    for (CityId pos = 0; pos < instance.number_of_cities(); ++pos)
+        if (tsp_solution.vertex_id(pos) == 0)
+            return pos;
+    throw std::invalid_argument(
+            "travellingthiefsolver::travelling_thief::depot_position: "
+            "the tour doesn't contain the depot.");
+}
+
 template <typename Distances>
 Solution retrieve_solution(
         const Distances& distances,
         const Instance& instance,
         const travelingsalesmansolver::Solution& tsp_solution)
 {
+    CityId depot_pos = depot_position(instance, tsp_solution);
     Solution solution(instance);
     for (CityId pos = 1; pos < instance.number_of_cities(); ++pos) {
-        CityId city_id = tsp_solution.vertex_id(pos);
+        CityId city_id = tsp_solution.vertex_id(
+                (depot_pos + pos) % instance.number_of_cities());
         solution.add_city(distances, city_id);
     }
     return solution;
@@ -113,9 +142,11 @@ Solution retrieve_solution_2(
         const Instance& instance,
         const travelingsalesmansolver::Solution& tsp_solution)
 {
+    CityId depot_pos = depot_position(instance, tsp_solution);
     Solution solution(instance);
     for (CityId pos = instance.number_of_cities() - 1; pos > 0; --pos) {
-        CityId city_id = tsp_solution.vertex_id(pos);
+        CityId city_id = tsp_solution.vertex_id(
+                (depot_pos + pos) % instance.number_of_cities());
         solution.add_city(distances, city_id);
     }
     return solution;
@@ -128,28 +159,27 @@ std::vector<Solution> solve_tsp_lkh(
         const travelingsalesmansolver::Instance& tsp_instance,
         std::mt19937_64& generator,
         const Parameters& parameters,
-        std::string& lkh_candidate_file_content)
+        travelingsalesmansolver::CandidateLists& tsp_candidates)
 {
-    std::uniform_int_distribution<Counter> d_seed(1, 1e8);
-    travelingsalesmansolver::LkhParameters tsp_parameters;
+    // Compute the candidates the first time.
+    if (tsp_candidates.empty()) {
+        travelingsalesmansolver::AlphaNearnessParameters alpha_nearness_parameters;
+        alpha_nearness_parameters.initial_period = 100;
+        tsp_candidates = travelingsalesmansolver::alpha_nearness_candidates(
+                tsp_instance.distances(),
+                alpha_nearness_parameters).candidates;
+    }
+
+    travelingsalesmansolver::LinKernighanParameters tsp_parameters;
     tsp_parameters.timer = parameters.timer;
     tsp_parameters.verbosity_level = 0;
-    if (instance.number_of_cities() < 1e4) {
-        tsp_parameters.candidate_set_type = "DELAUNAY";
-    } else {
-        tsp_parameters.candidate_set_type = "POPMUSIC";
-    }
-    tsp_parameters.initial_period = "100";
-    tsp_parameters.runs = "1";
-    tsp_parameters.max_trials = "1";
-    tsp_parameters.seed = std::to_string(d_seed(generator));
-    tsp_parameters.candidate_file_content = lkh_candidate_file_content;
-    auto tsp_output = travelingsalesmansolver::lkh(
+    tsp_parameters.maximum_number_of_trials = 1;
+    auto tsp_output = travelingsalesmansolver::lin_kernighan(
             tsp_instance,
-            tsp_parameters);
-    //std::cout << tsp_output.solution.distance() << std::endl;
-    if (lkh_candidate_file_content.empty())
-        lkh_candidate_file_content = tsp_output.candidate_file_content;
+            generator,
+            tsp_parameters,
+            nullptr,
+            &tsp_candidates);
 
     return {
         retrieve_solution(distances, instance, tsp_output.solution),

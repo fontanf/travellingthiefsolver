@@ -29,7 +29,7 @@ target_link_libraries(TravellingThiefSolver_travelling_thief_efficient_local_sea
     TravellingThiefSolver_packing_while_travelling
     TravellingThiefSolver_packing_while_travelling_sequential_value_correction
     TravellingThiefSolver_packing_while_travelling_efficient_local_search
-    TravelingSalesmanSolver::lkh 
+    TravelingSalesmanSolver::lin_kernighan
     LocalSearchSolver::localsearchsolver)
 add_library(TravellingThiefSolver::travelling_thief::efficient_local_search ALIAS TravellingThiefSolver_travelling_thief_efficient_local_search)
 

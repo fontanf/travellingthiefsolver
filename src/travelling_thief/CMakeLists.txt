@@ -11,7 +11,7 @@ target_link_libraries(TravellingThiefSolver_travelling_thief PUBLIC
     TravellingThiefSolver_packing_while_travelling
     TravellingThiefSolver_travelling_while_packing
     TravelingSalesmanSolver::distances
-    TravelingSalesmanSolver::lkh
+    TravelingSalesmanSolver::lin_kernighan
     OptimizationTools::utils)
 add_library(TravellingThiefSolver::travelling_thief ALIAS TravellingThiefSolver_travelling_thief)
 

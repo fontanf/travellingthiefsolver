@@ -9,7 +9,7 @@
 #include "travellingthiefsolver/packing_while_travelling/algorithms/sequential_value_correction.hpp"
 #include "travellingthiefsolver/packing_while_travelling/algorithms/efficient_local_search.hpp"
 
-#include "travelingsalesmansolver/algorithms/lkh.hpp"
+#include "travelingsalesmansolver/candidates/candidate_lists.hpp"
 
 namespace travellingthiefsolver
 {
@@ -76,8 +76,7 @@ const IterativeTspPwtTtpOutput iterative_tsp_pwt_ttp(
     // Create travelingsalesman instance.
     auto tsp_instance = create_tsp_instance(instance);
 
-    std::string lkh_candidate_file_content = "";
-    std::vector<travelingsalesmansolver::LkhCandidate> lkh_candidates;
+    travelingsalesmansolver::CandidateLists tsp_candidates;
 
     std::vector<Solution> svc_solutions;
     Counter svc_solutions_size = 10;
@@ -93,7 +92,7 @@ const IterativeTspPwtTtpOutput iterative_tsp_pwt_ttp(
                 tsp_instance,
                 generator,
                 parameters,
-                lkh_candidate_file_content);
+                tsp_candidates);
 
         auto tsp_end = std::chrono::steady_clock::now();
         std::chrono::duration<double> tsp_time_span
@@ -196,7 +195,7 @@ const IterativeTspPwtTtpOutput iterative_tsp_pwt_ttp(
         ttpels_parameters.timer = parameters.timer;
         ttpels_parameters.verbosity_level = 0;
         ttpels_parameters.initial_solution = &els_solution;
-        ttpels_parameters.lkh_candidate_file_content = lkh_candidate_file_content;
+        ttpels_parameters.tsp_candidates = tsp_candidates;
         auto ttpels_output = efficient_local_search(
                 instance,
                 generator,
@@ -227,7 +226,7 @@ const IterativeTspPwtTtpOutput iterative_tsp_pwt_ttp(
                 tsp_instance,
                 generator,
                 parameters,
-                lkh_candidate_file_content);
+                tsp_candidates);
 
         auto tsp_end = std::chrono::steady_clock::now();
         std::chrono::duration<double> tsp_time_span
@@ -323,7 +322,7 @@ const IterativeTspPwtTtpOutput iterative_tsp_pwt_ttp(
                 ttpels_parameters.timer = parameters.timer;
                 ttpels_parameters.verbosity_level = 0;
                 ttpels_parameters.initial_solution = &els_solution;
-                ttpels_parameters.lkh_candidate_file_content = lkh_candidate_file_content;
+                ttpels_parameters.tsp_candidates = tsp_candidates;
                 auto ttpels_output = efficient_local_search(
                         instance,
                         generator,
